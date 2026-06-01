@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>fk3 Pädagogische Planungshilfe</title>
+<style>
+:root{
+  --clr-accent-light:#69A3D2;--clr-accent-dark:#103354;--clr-bg:#ffffff;--clr-text:#1a1a1a;
+  --clr-text-muted:#5a6370;--clr-border:#d0d5dd;--clr-surface:#f4f7fa;--clr-surface-hover:#e8edf3;
+  --clr-success:#2e7d4f;--clr-success-light:#eef7f1;--clr-danger:#c0392b;--clr-white:#ffffff;
+  --clr-fertig-bg:#eef7f1;--clr-fertig-bg-hover:#ddf0e3;--clr-keine-infos-bg:#e8e8e8;--clr-keine-infos-bg-hover:#dcdcdc;
+  --radius:8px;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);
+  --transition:0.2s ease;--max-width:1200px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--clr-text);background:var(--clr-bg);line-height:1.6;padding:24px 16px 80px}
+.app-container{max-width:var(--max-width);margin:0 auto}
+
+.abschnitt{border:1px solid var(--clr-border);border-radius:var(--radius);margin-bottom:16px;background:var(--clr-white)}
+.abschnitt-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;cursor:pointer;user-select:none;gap:12px;min-height:56px}
+.abschnitt-header:hover{background:var(--clr-surface)}
+.abschnitt.nicht-klappbar .abschnitt-header{cursor:default}
+.abschnitt.nicht-klappbar .abschnitt-header:hover{background:transparent}
+.abschnitt-titel{font-size:1.6rem;font-weight:700;color:var(--clr-accent-dark);letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.abschnitt-titel .chevron{font-size:.7rem;color:var(--clr-text-muted);transition:transform var(--transition)}
+.abschnitt.offen .abschnitt-titel .chevron{transform:rotate(90deg)}
+.abschnitt-inhalt{padding:0 24px 24px;display:none}
+.abschnitt.offen .abschnitt-inhalt{display:block}
+.abschnitt-header-rechts{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.fortschritt{font-size:.75rem;color:var(--clr-text-muted);white-space:nowrap;background:var(--clr-surface);padding:4px 10px;border-radius:12px}
+.fortschritt strong{color:var(--clr-accent-dark)}
+.fortschritt-badges{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.f-badge{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.f-badge-gruen{background:var(--clr-success-light);color:var(--clr-success)}
+.f-badge-grau{background:var(--clr-keine-infos-bg);color:#666}
+.f-badge-fertig{background:var(--clr-success);color:var(--clr-white)}
+.abschnitt.abschnitt-fertig-bg{background:var(--clr-fertig-bg);border-color:#a8d5b8}
+.abschnitt.abschnitt-fertig-bg .abschnitt-titel{color:var(--clr-success)}
+.abschnitt.abschnitt-fertig-bg .abschnitt-header:hover{background:var(--clr-fertig-bg-hover)}
+
+.bereich{border:1px solid var(--clr-border);border-radius:var(--radius);margin-bottom:10px;background:var(--clr-white);overflow:hidden;transition:background var(--transition),border-color var(--transition)}
+.bereich-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:8px;min-height:42px}
+.bereich-titel{font-size:1.05rem;font-weight:700;color:var(--clr-accent-dark);transition:color var(--transition)}
+.bereich-inhalt{padding:0 16px 14px}
+.bereich.eingeklappt .bereich-inhalt{display:none}
+.bereich.eingeklappt .bereich-header{cursor:pointer}
+.bereich.eingeklappt .bereich-header:hover{background:var(--clr-surface)}
+.bereich.fertig-bg{background:var(--clr-fertig-bg);border-color:#a8d5b8}
+.bereich.fertig-bg .bereich-titel{color:var(--clr-success)}
+.bereich.fertig-bg.eingeklappt .bereich-header:hover{background:var(--clr-fertig-bg-hover)}
+.bereich.fertig-bg.eingeklappt:hover .btn--fertig-badge{background:#256b40;border-color:#256b40}
+.bereich.keine-infos-bg{background:var(--clr-keine-infos-bg);border-color:#ccc}
+.bereich.keine-infos-bg .bereich-titel{color:#666}
+.bereich.keine-infos-bg.eingeklappt .bereich-header:hover{background:var(--clr-keine-infos-bg-hover)}
+.bereich.keine-infos-bg.eingeklappt:hover .btn--keine-infos-badge{background:#c8c8c8;color:#444}
+/* Collapsed bereich with toggle: hover triggers first toggle option */
+.bereich.eingeklappt:not(.fertig-bg):not(.keine-infos-bg) .bereich-header:hover .toggle-option:first-child{background:var(--clr-surface-hover)}
+
+.a1-bereich-titel{font-size:1.05rem;font-weight:700;color:var(--clr-accent-dark);margin:16px 0 6px;display:flex;align-items:center;gap:8px}
+.a1-bereich-titel:first-child{margin-top:0}
+.stichpunkt-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.stichpunkt-badge.grau{background:var(--clr-keine-infos-bg);color:#666}
+.stichpunkt-badge.gruen{background:var(--clr-success-light);color:var(--clr-success)}
+
+.feld{margin-bottom:10px}
+.feld:last-child{margin-bottom:0}
+.feld-label{display:block;font-size:.82rem;font-weight:600;color:var(--clr-accent-dark);margin-bottom:4px;line-height:1.4;white-space:pre-line}
+.feld-label-inline{display:flex;gap:2em;flex-wrap:wrap;font-size:.82rem;font-weight:600;color:var(--clr-accent-dark);margin-bottom:4px;line-height:1.4}
+.feld-label-inline span{white-space:nowrap}
+.feld-input,.feld-textarea{width:100%;padding:10px 12px;font-size:.88rem;border:1px solid var(--clr-border);border-radius:var(--radius);background:var(--clr-white);color:var(--clr-text);transition:border-color var(--transition),box-shadow var(--transition),background var(--transition),color var(--transition);font-family:inherit;line-height:1.5}
+.feld-input:focus,.feld-textarea:focus{outline:none;border-color:var(--clr-accent-light);box-shadow:0 0 0 3px rgba(105,163,210,.2)}
+.feld-textarea{resize:vertical;min-height:65px;height:65px;overflow:hidden}
+.feld-textarea.ta-fertig{background:var(--clr-fertig-bg);border-color:#a8d5b8;color:var(--clr-success)}
+.feld-textarea.ta-keine-infos{background:var(--clr-keine-infos-bg);border-color:#bbb;color:#888}
+.feld-input::placeholder,.feld-textarea::placeholder{color:#aab0b8;font-size:.84rem}
+.feld-row{display:flex;gap:12px;flex-wrap:wrap}
+.feld-row>.feld{flex:1;min-width:150px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 18px;font-size:.85rem;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;transition:all var(--transition);font-family:inherit;text-align:center;min-width:120px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn--primary{background:var(--clr-accent-dark);color:var(--clr-white)}
+.btn--primary:hover:not(:disabled){background:#1a4a72}
+.btn--secondary{background:var(--clr-surface);color:var(--clr-accent-dark);border:1px solid var(--clr-border)}
+.btn--secondary:hover:not(:disabled){background:var(--clr-surface-hover)}
+.btn--small{padding:7px 14px;font-size:.8rem;min-width:150px}
+.btn--danger-outline{background:none;border:1px solid var(--clr-border);color:var(--clr-text-muted);padding:6px 14px;font-size:.8rem;min-width:120px}
+.btn--danger-outline:hover:not(:disabled){border-color:var(--clr-danger);color:var(--clr-danger)}
+.btn--fertig{background:var(--clr-success);color:var(--clr-white);padding:6px 14px;font-size:.8rem}
+.btn--fertig:hover:not(:disabled){background:#256b40}
+.btn--keine-infos{background:var(--clr-keine-infos-bg);border:1px solid #ccc;color:#666;padding:6px 14px;font-size:.8rem;min-width:120px}
+.btn--keine-infos:hover:not(:disabled){background:var(--clr-keine-infos-bg-hover);border-color:#aaa;color:#444}
+.bereich-footer-buttons{display:flex;gap:8px;margin-top:14px;align-items:center}
+.abschnitt-footer{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--clr-border)}
+
+.toggle-wrapper{display:inline-flex;align-items:stretch;border-radius:var(--radius);overflow:hidden;border:2px solid var(--clr-border)}
+.toggle-option{padding:5px 14px;text-align:center;font-size:.78rem;font-weight:600;cursor:pointer;background:var(--clr-white);color:var(--clr-text-muted);transition:all var(--transition);border:none;font-family:inherit;line-height:1.4;white-space:nowrap}
+.toggle-option.active{background:var(--clr-accent-dark);color:var(--clr-white)}
+.toggle-option:hover:not(.active){background:var(--clr-surface-hover)}
+
+.btn--fertig-badge{width:110px;padding:5px 0;font-size:.78rem;font-weight:700;border:2px solid var(--clr-success);border-radius:var(--radius);cursor:pointer;background:var(--clr-success);color:var(--clr-white);font-family:inherit;transition:all var(--transition);white-space:nowrap;text-align:center}
+.btn--fertig-badge:hover{background:#256b40;border-color:#256b40}
+
+.btn--keine-infos-badge{width:110px;padding:5px 0;font-size:.78rem;font-weight:700;border:2px solid #bbb;border-radius:var(--radius);cursor:pointer;background:#e0e0e0;color:#666;font-family:inherit;transition:all var(--transition);white-space:nowrap;text-align:center}
+.btn--keine-infos-badge:hover{background:#c8c8c8;border-color:#999;color:#444}
+
+.lueckentext{font-size:.88rem;line-height:2.2;color:var(--clr-text)}
+.lueckentext-satz{margin-bottom:2px;display:flex;flex-wrap:wrap;align-items:baseline;gap:0}
+.lueckentext-satz span{white-space:pre-wrap}
+.luecke-dropdown{padding:4px 8px;font-size:.85rem;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-weight:600;border:1px solid var(--clr-accent-light);border-radius:4px;background:var(--clr-white);color:var(--clr-accent-dark);cursor:pointer;margin:0 2px;vertical-align:baseline}
+.luecke-dropdown option{font-size:.85rem;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-weight:600}
+.luecke-dropdown:focus{outline:none;box-shadow:0 0 0 2px rgba(105,163,210,.3)}
+.luecke-freitext-wrapper{display:inline-flex;align-items:center;gap:0;margin:0 2px;vertical-align:baseline}
+.luecke-freitext{padding:4px 8px;font-size:.85rem;border:1px solid var(--clr-accent-light);border-radius:4px 0 0 4px;background:var(--clr-white);color:var(--clr-accent-dark);font-family:inherit;font-weight:600;min-width:120px;max-width:240px}
+.luecke-freitext:focus{outline:none;box-shadow:0 0 0 2px rgba(105,163,210,.3)}
+.luecke-close{padding:4px 8px;font-size:.78rem;border:1px solid var(--clr-accent-light);border-left:none;border-radius:0 4px 4px 0;background:var(--clr-surface);color:var(--clr-text-muted);cursor:pointer;font-family:inherit;line-height:1}
+.luecke-close:hover{background:var(--clr-surface-hover);color:var(--clr-danger)}
+.lueckentext-letzte-zeile{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+
+.vorfrage{margin-bottom:10px;padding:10px 14px;background:var(--clr-surface);border-radius:var(--radius);font-size:.85rem}
+.vorfrage-label{font-weight:600;color:var(--clr-accent-dark);margin-right:8px}
+.vorfrage-buttons{display:inline-flex;gap:6px;margin:0 8px}
+.vorfrage-btn{padding:4px 12px;font-size:.78rem;border:1px solid var(--clr-border);border-radius:4px;cursor:pointer;background:var(--clr-white);color:var(--clr-text-muted);font-family:inherit;font-weight:600;transition:all var(--transition)}
+.vorfrage-btn.active{background:var(--clr-accent-dark);color:var(--clr-white);border-color:var(--clr-accent-dark)}
+.vorfrage-extra{margin-top:8px}
+.sinnes-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.sinnes-btn{padding:5px 12px;font-size:.78rem;border:1px solid var(--clr-border);border-radius:var(--radius);cursor:pointer;background:var(--clr-white);color:var(--clr-text-muted);font-family:inherit;font-weight:500;transition:all var(--transition)}
+.sinnes-btn.active{background:var(--clr-accent-dark);color:var(--clr-white);border-color:var(--clr-accent-dark)}
+.niveau-satz{font-size:.88rem;color:var(--clr-text);margin-bottom:8px;line-height:1.8}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.sichtbar{display:flex}
+.modal{background:var(--clr-white);border-radius:calc(var(--radius)*1.5);box-shadow:var(--shadow-md);padding:28px;max-width:400px;width:100%}
+.modal h3{font-size:1.05rem;color:var(--clr-accent-dark);margin-bottom:8px;font-weight:700}
+.modal p{font-size:.88rem;color:var(--clr-text-muted);margin-bottom:20px;line-height:1.5;white-space:pre-line}
+.modal-buttons{display:flex;gap:10px;justify-content:center}
+
+.app-footer{border-top:1px solid var(--clr-border);padding-top:16px;margin-top:8px;font-size:.75rem;color:var(--clr-text-muted);line-height:1.5;text-align:left}
+.spacer-20{height:20px}
+.export-row{display:flex;gap:12px;justify-content:flex-end;margin:20px 0 12px;flex-wrap:wrap}
+.textvorschau-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.textvorschau-overlay.sichtbar{display:flex}
+.textvorschau{background:var(--clr-white);border-radius:calc(var(--radius)*1.5);box-shadow:var(--shadow-md);padding:24px;max-width:700px;width:100%;max-height:85vh;display:flex;flex-direction:column}
+.textvorschau h3{font-size:1.05rem;color:var(--clr-accent-dark);margin-bottom:12px;font-weight:700}
+.textvorschau-text{flex:1;overflow-y:auto;background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius);padding:16px;font-size:.82rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;line-height:1.6;color:var(--clr-text);white-space:pre-wrap;word-wrap:break-word;min-height:200px}
+.textvorschau-buttons{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.kopiert-hinweis{font-size:.78rem;color:var(--clr-success);font-weight:600;align-self:center}
+.btn--umwandeln{background:var(--clr-accent-dark);color:var(--clr-white);padding:5px 12px;font-size:.78rem;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;align-self:center;transition:all var(--transition)}
+.btn--umwandeln:hover{background:#1a4a72}
+
+/* === MERGE === */
+.merge-bar{background:var(--clr-accent-dark);color:var(--clr-white);padding:10px 24px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;border-radius:var(--radius);margin-bottom:16px}
+.merge-bar .merge-x{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.3);color:var(--clr-white);padding:4px 14px;font-size:.78rem;font-weight:600;border-radius:var(--radius);cursor:pointer;font-family:inherit}
+.merge-bar .merge-x:hover{background:rgba(255,255,255,.15)}
+.quellen-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.quellen-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:14px;font-size:.78rem;font-weight:700}
+.keine-infos-hinweis{font-size:.82rem;color:#999;font-style:italic;padding:8px 14px;background:var(--clr-keine-infos-bg);border-radius:var(--radius);margin-bottom:10px}
+.sub-label{font-size:.82rem;font-weight:600;color:var(--clr-accent-dark);margin:12px 0 6px;display:flex;align-items:center;gap:4px}
+.sub-label .pfeil{color:var(--clr-text-muted)}
+.synthese{margin-top:10px;padding:14px;background:var(--clr-surface);border-radius:var(--radius)}
+.synthese-label{font-size:.78rem;font-weight:700;color:var(--clr-accent-dark);margin-bottom:6px}
+.merge-popup{background:var(--clr-white);border-radius:calc(var(--radius)*1.5);box-shadow:var(--shadow-md);padding:28px;max-width:800px;width:100%;max-height:85vh;overflow-y:auto}
+.merge-popup h3{font-size:1.05rem;color:var(--clr-accent-dark);margin-bottom:6px;font-weight:700}
+.merge-popup p{font-size:.85rem;color:var(--clr-text-muted);margin-bottom:16px;line-height:1.5}
+.dropzone{border:2px dashed var(--clr-border);border-radius:var(--radius);padding:28px;text-align:center;color:var(--clr-text-muted);font-size:.85rem;cursor:pointer;transition:all var(--transition);margin-bottom:16px}
+.dropzone:hover,.dropzone.dragover{border-color:var(--clr-accent-light);background:rgba(105,163,210,.06)}
+.merge-liste{margin-bottom:16px}
+.merge-tabelle{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:16px}
+.merge-tabelle th{text-align:left;padding:8px 12px;border-bottom:2px solid var(--clr-border);color:var(--clr-accent-dark);font-weight:700;font-size:.78rem}
+.merge-tabelle td{padding:8px 12px;border-bottom:1px solid var(--clr-border);vertical-align:middle}
+.merge-tabelle input{padding:5px 10px;font-size:.85rem;font-weight:600;border:1px solid var(--clr-border);border-radius:var(--radius);font-family:inherit;width:100%;color:var(--clr-accent-dark)}
+.merge-tabelle input:focus{outline:none;border-color:var(--clr-accent-light);box-shadow:0 0 0 2px rgba(105,163,210,.2)}
+.merge-tabelle .btn--entfernen{padding:4px 12px;font-size:.75rem;font-weight:600;border:1px solid var(--clr-danger);border-radius:var(--radius);background:var(--clr-white);color:var(--clr-danger);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all var(--transition)}
+.merge-tabelle .btn--entfernen:hover{background:var(--clr-danger);color:var(--clr-white)}
+.merge-popup-buttons{display:flex;gap:10px;justify-content:center}
+
+@media(max-width:640px){
+  body{padding:12px 8px 60px}
+  .abschnitt-header{padding:14px 16px}
+  .abschnitt-titel{font-size:1.2rem}
+  .bereich-header{padding:10px 12px}
+  .bereich-inhalt{padding:0 12px 12px}
+  .abschnitt-inhalt{padding:0 16px 16px}
+  .feld-row{flex-direction:column}
+  .abschnitt-header-rechts{flex-wrap:wrap;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="app-container" id="app"></div>
+<div class="modal-overlay" id="popup">
+  <div class="modal">
+    <h3 id="popup-titel"></h3>
+    <p id="popup-text"></p>
+    <div class="modal-buttons" id="popup-buttons">
+      <button class="btn btn--secondary btn--small" id="popup-abbrechen">Abbrechen</button>
+      <button class="btn btn--primary btn--small" id="popup-ok">Ok</button>
+    </div>
+  </div>
+</div>
+<div class="textvorschau-overlay" id="textvorschau-overlay">
+  <div class="textvorschau">
+    <h3>Textvorschau</h3>
+    <div class="textvorschau-text" id="textvorschau-text"></div>
+    <div class="textvorschau-buttons">
+      <span class="kopiert-hinweis" id="kopiert-hinweis" style="display:none">Kopiert!</span>
+      <button class="btn btn--primary btn--small" id="text-kopieren">Text kopieren</button>
+      <button class="btn btn--secondary btn--small" id="textvorschau-schliessen">Schlie&szlig;en</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="merge-overlay">
+  <div class="merge-popup">
+    <h3>Dateien zusammenf&uuml;hren</h3>
+    <p>Importiere die fk3-Dateien deiner Kolleg:innen. Aus den Eingaben wird eine Teamversion erstellt, in der du die Antworten aller zusammenf&uuml;hrst.</p>
+    <div class="dropzone" id="merge-dropzone">fk3-Dateien hierher ziehen oder klicken</div>
+    <input type="file" id="merge-file-input" multiple accept=".fk3,.json" style="display:none">
+    <table class="merge-tabelle" id="merge-liste" style="display:none">
+      <thead><tr><th>Datei</th><th>K&uuml;rzel</th><th>Kind</th><th></th></tr></thead>
+      <tbody id="merge-tbody"></tbody>
+    </table>
+    <div class="merge-popup-buttons">
+      <button class="btn btn--secondary btn--small" id="merge-abbrechen">Abbrechen</button>
+      <button class="btn btn--primary btn--small" id="merge-starten" disabled>Mergen</button>
+    </div>
+  </div>
+</div>
+<script>
+const STORAGE_KEY='fk3_planungshilfe';
+const niveauOptionen=['VSK','Anfang 1','Mitte 1','Ende 1','Anfang 2','Mitte 2','Ende 2','Anfang 3','Mitte 3','Ende 3','Anfang 4','Mitte 4','Ende 4','\u2026'];
+let daten=ladeState();
+let popupCallback=null;
+let nameTimer=null;
+const abschliessenFn={};
+let mergeModus=false;
+let mergeQuellen=[];
+let mergeOriginal={};
+const MERGE_STORAGE='fk3_merge';
+function speichereMerge(){try{localStorage.setItem(MERGE_STORAGE,JSON.stringify({mergeModus,mergeQuellen,mergeOriginal}))}catch(e){}}
+function ladeMerge(){try{const s=localStorage.getItem(MERGE_STORAGE);if(s){const m=JSON.parse(s);mergeModus=!!m.mergeModus;mergeQuellen=m.mergeQuellen||[];mergeOriginal=m.mergeOriginal||{}}}catch(e){}}
+ladeMerge();
+const MERGE_FARBEN=['#534AB7','#0F6E56','#D85A30','#D4537E','#378ADD','#BA7517','#888780'];
+const MERGE_BG=['#EEEDFE','#E1F5EE','#FAECE7','#FBEAF0','#E6F1FB','#FAEEDA','#F1EFE8'];
+const MERGE_TEXT=['#3C3489','#085041','#712B13','#72243E','#0C447C','#633806','#444441'];
+
+// Escaped quotes with backtick template literals to avoid HTML issues
+const freitextVorlagen={
+  kognition:`- Denkprozesse: kann Probleme durchdenken, Zusammenh\u00e4nge erkennen, Ursachen ableiten?
+- Arbeitsausdauer: bleibt es bei einer Aufgabe, h\u00e4lt es St\u00f6rungen aus?
+- Aufmerksamkeit: leicht ablenkbar, wechselt oft das Thema, \u201espringt\u201c im Denken?
+- Verarbeitungstempo: sehr langsam/schnell, verliert \u00dcberblick?
+- Planungskompetenz: kann Schritte strukturieren oder f\u00e4ngt einfach \u201eirgendwo\u201c an?
+- Reaktionsweise: reagiert \u00fcberhastet oder z\u00f6gerlich, zeigt Vermeidungsverhalten?
+- Merkf\u00e4higkeit: erinnert Gelerntes/Besprochenes (Kurz- und Langzeitged\u00e4chtnis)?`,
+  sprache:`- Mehrsprachigkeit: Welche Sprachen werden zu Hause gesprochen? Sprachniveau in Deutsch vs. Herkunftssprache?
+- Sprachverst\u00e4ndnis: versteht (komplexe/einfache) Anweisungen, Fragen, Geschichten?
+- Wortschatz / Grammatik: spricht altersgemäß oder in sehr einfachen S\u00e4tzen?
+- Erz\u00e4hlen / Beschreiben: kann Gedachtes in Worte fassen, Situationen erkl\u00e4ren?
+- Sprechweise: undeutlich, leise, hektisch, auff\u00e4llig in Ton oder Lautbildung
+- Gespr\u00e4chsverhalten: h\u00f6rt zu, wartet ab, f\u00e4llt anderen ins Wort?
+- Nonverbale Kommunikation: K\u00f6rpersprache, Mimik, Blickkontakt`,
+  emotionen:`- Impulskontrolle: kann das Kind sich bremsen oder \u201eexplodiert\u201c es schnell?
+- Frustrationstoleranz: wie reagiert es bei Frust, Fehlern, Verlust oder Kritik?
+- Selbstregulation: kann es sich nach Aufregung beruhigen?
+- Stimmungslage: \u00e4ngstlich, traurig, w\u00fctend oder gereizt \u2013 oder emotional stabil?
+- Selbstwert: wirkt es unsicher, zieht sich zur\u00fcck, macht sich klein oder gro\u00df?
+- Selbstwahrnehmung: Wie erlebt es seine Position in der Klasse? \u00c4u\u00dfert es W\u00fcnsche oder Sorgen?
+- Verhaltensmuster: stereotype Reaktionen, auff\u00e4llige Routinen, Widerstandshaltung?`,
+  sozial:`- Kontaktaufnahme: sucht N\u00e4he, meidet andere, wirkt distanziert oder \u00fcbergriffig?
+- Kooperation: kann sich in Gruppen einf\u00fcgen, teilt, nimmt R\u00fccksicht, h\u00e4lt Absprachen ein?
+- Konfliktverhalten: wird schnell aggressiv, kann nicht streiten, geht Konflikten aus dem Weg?
+- Rollenerleben: dr\u00e4ngt sich in den Vordergrund oder zieht sich zur\u00fcck?
+- Empathie / Perspektiv\u00fcbernahme: versteht Gef\u00fchle anderer, zeigt Mitgef\u00fchl?
+- Zugeh\u00f6rigkeit zur Gruppe: ist integriert/isoliert, wird von Kindern akzeptiert, hat feste soziale Beziehungen?`,
+  motorik:`- K\u00f6rpermotorik: rennt, h\u00fcpft, balanciert \u2013 ist das Kind eher ungeschickt oder sicher in Bewegung? (z.B. Beobachtungen vom Sport-Aufbau)
+- K\u00f6rperspannung / Haltung: eher schlaff oder sehr angespannt?
+- Feinmotorik: Schneiden, Schreiben, Malen, Schleifen binden?
+- Sinneswahrnehmung: empfindlich bei Ger\u00e4uschen, Licht, Ber\u00fchrung (\u00dcber- oder Unterempfindlichkeit)?
+- Visuelle Wahrnehmung: erkennt Formen, Gr\u00f6\u00dfen, Abst\u00e4nde?
+- Auditive Wahrnehmung: kann es genau hinh\u00f6ren, Laute unterscheiden, Anweisungen aufnehmen?
+- R\u00e4umliche Orientierung: findet sich im Schulgeb\u00e4ude zurecht, etc.?`,
+  lernstrategien:`- Planung: Geht es strukturiert vor? Macht es sich Gedanken, bevor es loslegt?
+- Selbststeuerung: Kann es Arbeitsschritte durchhalten oder verliert es schnell den Faden?
+- Probleml\u00f6severhalten: Sucht es nach L\u00f6sungen oder gibt es schnell auf (z.B. sich Hilfe holen)?
+- Motivation: Zeigt es Lernfreude, Neugier, Engagement?
+- Selbstinstruktion: Redet es sich selbst durch Aufgaben? (\u201eErst das, dann das...\u201c)
+- Lernorganisation: Ist es vorbereitet; Nutzt es Hilfsmittel (Lineal, Markierungen, Nachfragen)?`
+};
+
+function leerState(){
+  return {
+    kindName:'',meinName:'',datum:heutigesDatum(),
+    abschnittOffen:{a1:false,a2:false,a3:false,a4:false},
+    abschnittBesucht:{a1:false,a2:false,a3:false,a4:false},
+    abschnittAbgeschlossen:{a1:false,a2:false,a3:false,a4:false},
+    staerken:'',auffaelligkeiten:'',kinderperspektive:'',
+    fruehkindlich:'',fruehkindlich_status:null,kita:'',kita_status:null,viereinhalb:'',viereinhalb_status:null,
+    familienleben:'',familienleben_status:null,allergien:'',allergien_status:null,therapien:'',therapien_status:null,freizeit:'',freizeit_status:null,
+    kognition_modus:null,kognition_fertig:false,kognition_luecken:{},kognition_freitext:'',kognition_washilft:'',
+    sprache_modus:null,sprache_fertig:false,sprache_luecken:{},sprache_freitext:'',sprache_washilft:'',
+    sprache_mehrsprachig:null,sprache_sprachen:'',
+    emotionen_modus:null,emotionen_fertig:false,emotionen_luecken:{},emotionen_freitext:'',
+    emotionen_anzeichen:'',emotionen_washilft:'',emotionen_vermeiden:'',
+    sozial_modus:null,sozial_fertig:false,sozial_luecken:{},sozial_freitext:'',sozial_washilft:'',
+    motorik_modus:null,motorik_fertig:false,motorik_luecken:{},motorik_freitext:'',motorik_washilft:'',
+    motorik_sinne:[],motorik_sinne_text:'',
+    lernstrategien_modus:null,lernstrategien_fertig:false,lernstrategien_luecken:{},lernstrategien_freitext:'',lernstrategien_naechster:'',
+    deutsch_modus:null,deutsch_fertig:false,deutsch_niveau:'',
+    deutsch_details:'- Lesen: Buchstabenkenntnis, Silbenlesen, sinnerfassendes Lesen, Lesefluss?\n- Schreiben: Schriftbild, Rechtschreibstrategien, Textproduktion?\n- Sprechen: m\u00fcndlicher Ausdruck, Wortschatz, Grammatik?\n- Verst\u00e4ndnis: Textverst\u00e4ndnis, Arbeitsanweisungen, H\u00f6rverst\u00e4ndnis?',
+    deutsch_naechster:'',
+    mathe_modus:null,mathe_fertig:false,mathe_niveau:'',
+    mathe_details:'- Zahlenverst\u00e4ndnis: Mengen erfassen, Zahlen ordnen, Stellenwert?\n- Rechnen: Addieren, Subtrahieren, Multiplizieren, Dividieren (mit/ohne Hilfsmittel)?\n- Mathematisches Denken: erkennt Muster, stellt Fragen, sucht L\u00f6sungswege?\n- Sachaufgaben: versteht Textaufgaben, kann Zusammenh\u00e4nge erkennen?\n- Geometrie / Gr\u00f6\u00dfen: Formen, L\u00e4ngen, Zeit, Geld?',
+    mathe_naechster:''
+  };
+}
+function heutigesDatum(){return new Date().toISOString().split('T')[0]}
+function ladeState(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)return JSON.parse(s)}catch(e){}return leerState()}
+function speichereState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(daten))}catch(e){}}
+function N(){return daten.kindName||'[Name]'}
+function hatZeilen(t,min){if(!t)return false;const zeilen=t.split('\n').filter(z=>z.trim()).length;const woerter=t.trim().split(/\s+/).filter(w=>w).length;return zeilen>=min||woerter>25}
+
+function zeigePopup(titel,text,onOk,nurOk){
+  document.getElementById('popup-titel').textContent=titel;
+  document.getElementById('popup-text').textContent=text;
+  document.getElementById('popup-abbrechen').style.display=nurOk?'none':'';
+  document.getElementById('popup').classList.add('sichtbar');
+  popupCallback=onOk;
+}
+document.getElementById('popup-ok').onclick=()=>{document.getElementById('popup').classList.remove('sichtbar');document.getElementById('popup-abbrechen').style.display='';if(popupCallback)popupCallback();popupCallback=null};
+document.getElementById('popup-abbrechen').onclick=()=>{document.getElementById('popup').classList.remove('sichtbar');popupCallback=null};
+
+// ============================================================
+// LÜCKENTEXTE
+// ============================================================
+function LT(){const n=N();return{
+kognition:[{id:'k1',t:[n+' kann bei einer Aufgabe ',{o:['selbstst\u00e4ndig \u00fcber l\u00e4ngere Zeit','mit Unterst\u00fctzung einige Minuten','nur sehr kurz','kaum']},' konzentriert arbeiten.']},{id:'k2',t:[n+' l\u00e4sst sich durch \u00e4u\u00dfere Reize ',{o:['kaum','teilweise','leicht','sehr leicht']},' ablenken.']},{id:'k3',t:[n+' kann Arbeitsschritte ',{o:['selbstst\u00e4ndig planen und umsetzen','mit Hilfe strukturieren','nur mit durchg\u00e4ngiger Anleitung umsetzen']},'.']},{id:'k4',t:[n+' erinnert Gelerntes ',{o:['zuverl\u00e4ssig','teilweise','nur mit Erinnerungshilfen','kaum']},'.']},{id:'k5',t:[n+' arbeitet in einem Tempo, das ',{o:['angemessen','eher langsam','sehr langsam','\u00fcberhastet und fehleranf\u00e4llig']},' ist.']}],
+sprache:[{id:'s1',t:[n+' versteht Anweisungen mit einem Schritt ',{o:['sicher','\u00fcberwiegend','noch nicht sicher']},'.']},{id:'s2',t:[n+' versteht Anweisungen mit mehreren Schritten ',{o:['sicher','\u00fcberwiegend','noch nicht sicher']},'.']},{id:'s3',t:[n+' verf\u00fcgt \u00fcber einen ',{o:['altersgem\u00e4\u00dfen','eingeschr\u00e4nkten','stark eingeschr\u00e4nkten']},' Wortschatz.']},{id:'s4',t:[n+' spricht ',{o:['in vollst\u00e4ndigen, grammatisch korrekten S\u00e4tzen','in einfachen S\u00e4tzen','in Zwei- bis Dreiworts\u00e4tzen','\u00fcberwiegend in Einworts\u00e4tzen']},'.']},{id:'s5',t:[n+' kann Erlebtes oder Gedachtes ',{o:['zusammenh\u00e4ngend','ansatzweise','kaum']},' erz\u00e4hlen oder beschreiben.']},{id:'s6',t:['Die Aussprache von '+n+' ist ',{o:['unauff\u00e4llig','teilweise undeutlich','deutlich auff\u00e4llig in der Lautbildung']},'.']},{id:'s7',t:['Im Gespr\u00e4ch ',{o:['h\u00f6rt '+n+' zu und wartet ab','f\u00e4llt '+n+' h\u00e4ufig ins Wort','beteiligt sich '+n+' kaum']},'.']}],
+emotionen:[{id:'e1',t:['Bei Frustration, Fehlern oder Kritik reagiert '+n+' \u00fcberwiegend mit ',{o:['R\u00fcckzug','Weinen','Wut','k\u00f6rperlicher Aggression','Verweigerung']},'.']},{id:'e2',t:[n+' kann eigene Impulse ',{o:['\u00fcberwiegend kontrollieren','teilweise kontrollieren','kaum kontrollieren']},'.']},{id:'e3',t:['Nach emotionaler Aufregung kann '+n+' sich ',{o:['selbstst\u00e4ndig','mit verbaler Unterst\u00fctzung','mit intensiver Begleitung','kaum']},' wieder beruhigen.']},{id:'e4',t:['Die Grundstimmung von '+n+' wirkt \u00fcberwiegend ',{o:['ausgeglichen','\u00e4ngstlich','traurig','gereizt','wechselhaft']},'.']},{id:'e5',t:[n+' zeigt ein ',{o:['stabiles','eher unsicheres','stark schwankendes']},' Selbstwertgef\u00fchl.']}],
+sozial:[{id:'so1',t:[n+' nimmt Kontakt zu anderen Kindern ',{o:['aktiv und angemessen','zur\u00fcckhaltend','kaum','auf \u00fcbergriffige Weise']},' auf.']},{id:'so2',t:['In Gruppenarbeit kann '+n+' sich ',{o:['gut einf\u00fcgen','mit Unterst\u00fctzung teilnehmen','kaum einf\u00fcgen']},'.']},{id:'so3',t:['Bei Konflikten reagiert '+n+' \u00fcberwiegend mit ',{o:['angemessenen L\u00f6sungsstrategien','R\u00fcckzug','verbaler Aggression','k\u00f6rperlicher Aggression','Hilflosigkeit']},'.']},{id:'so4',t:[n+' kann Gef\u00fchle anderer ',{o:['erkennen und darauf eingehen','teilweise erkennen','kaum erkennen']},'.']},{id:'so5',t:['In der Klasse ist '+n+' ',{o:['gut integriert','teilweise integriert','eher isoliert']},'.']},{id:'so6',t:[n+' hat ',{o:['feste Freundschaften','wechselnde Kontakte','kaum soziale Bez\u00fcge']},'.']}],
+motorik:[{id:'m1',t:[n+' bewegt sich ',{o:['sicher und koordiniert','etwas unsicher','deutlich unkoordiniert','auff\u00e4llig bewegungsunruhig']},'.']},{id:'m2',t:['Die K\u00f6rperspannung von '+n+' wirkt ',{o:['angemessen','eher schlaff','eher angespannt']},'.']},{id:'m3',t:[n+' kann feinmotorische Aufgaben wie Schneiden, Schreiben, Malen ',{o:['sicher','mit M\u00fche','kaum']},' ausf\u00fchren.']},{id:'m4',t:[n+' kann Laute ',{o:['sicher','teilweise','kaum']},' unterscheiden und Geh\u00f6rtes ',{o:['zuverl\u00e4ssig','teilweise','kaum']},' aufnehmen.']},{id:'m5',t:[n+' orientiert sich im Schulgeb\u00e4ude ',{o:['sicher','mit Unterst\u00fctzung','unsicher']},'.']}],
+lernstrategien:[{id:'l1',t:[n+' geht an Aufgaben ',{o:['strukturiert','teilweise planvoll','eher planlos']},' heran.']},{id:'l2',t:[n+' kann Aufgaben ',{o:['selbstst\u00e4ndig durcharbeiten und zeigt sie vor','mit Erinnerung fortf\u00fchren','verliert schnell den Faden']},'.']},{id:'l3',t:['Bei Schwierigkeiten ',{o:['sucht '+n+' nach L\u00f6sungen','holt sich '+n+' Hilfe','gibt '+n+' schnell auf','reagiert '+n+' mit Verweigerung']},'.']},{id:'l4',t:[n+' zeigt ',{o:['Lernfreude und Neugier','Motivation bei ausgew\u00e4hlten Themen','wenig Eigenantrieb','deutliche Lernunlust']},'.']},{id:'l5',t:[n+' nutzt Hilfsmittel ',{o:['selbstst\u00e4ndig','auf Hinweis','kaum']},'.']}]
+}}
+function ltZuSP(key){const s=LT()[key],l=daten[key+'_luecken']||{},r=[];for(const z of s){let g=false,t='',d=0;for(const p of z.t){if(typeof p==='string')t+=p;else{const k=z.id+'_'+d,w=l[k];if(w&&w.trim()){g=true;t+=w}else t+='[\u2026]';d++}}if(g)r.push('- '+t.trim())}return r.join('\n')}
+
+// ============================================================
+// FORTSCHRITT
+// ============================================================
+function fortschritt(aid){
+  let g=0,f=0,ki=0;
+  if(aid==='a1'){g=3;if(hatZeilen(daten.staerken,3))f++;if(hatZeilen(daten.auffaelligkeiten,3))f++;if(hatZeilen(daten.kinderperspektive,3))f++}
+  else if(aid==='a2'){const b=['fruehkindlich','kita','viereinhalb','familienleben','allergien','therapien','freizeit'];g=b.length;for(const x of b){const s=daten[x+'_status'];if(s==='fertig')f++;else if(s==='keine-infos')ki++}}
+  else if(aid==='a3'){const b=['kognition','sprache','emotionen','sozial','motorik'];g=b.length;for(const x of b){if(daten[x+'_fertig'])f++;else if(mergeModus&&daten[x+'_modus']==='keine-infos')ki++}}
+  else if(aid==='a4'){g=3;if(daten.lernstrategien_fertig)f++;else if(mergeModus&&daten.lernstrategien_modus==='keine-infos')ki++;if(daten.deutsch_fertig){if(daten.deutsch_modus==='keine-infos')ki++;else f++}else if(mergeModus&&daten.deutsch_modus==='keine-infos')ki++;if(daten.mathe_fertig){if(daten.mathe_modus==='keine-infos')ki++;else f++}else if(mergeModus&&daten.mathe_modus==='keine-infos')ki++}
+  return{g,f,ki};
+}
+
+// ============================================================
+// HELFER
+// ============================================================
+function autoH(ta){ta.style.height='65px';if(ta.scrollHeight>65)ta.style.height=ta.scrollHeight+'px'}
+function mkTF(label,key,ph){
+  const d=document.createElement('div');d.className='feld';
+  if(label){const l=document.createElement('label');l.className='feld-label';l.textContent=label;d.appendChild(l)}
+  const ta=document.createElement('textarea');ta.className='feld-textarea';if(ph)ta.placeholder=ph;ta.value=daten[key]||'';
+  ta.addEventListener('input',e=>{daten[key]=e.target.value;speichereState();autoH(e.target);aktualisiereUI()});
+  d.appendChild(ta);setTimeout(()=>autoH(ta),0);return d;
+}
+function mkInput(label,key,type,ph){
+  const d=document.createElement('div');d.className='feld';
+  const l=document.createElement('label');l.className='feld-label';l.textContent=label;d.appendChild(l);
+  const inp=document.createElement('input');inp.type=type;inp.className='feld-input';if(ph)inp.placeholder=ph;inp.value=daten[key]||'';
+  inp.addEventListener('input',e=>{daten[key]=e.target.value;speichereState();aktualisiereUI()});
+  d.appendChild(inp);return d;
+}
+function mkFortschrittBadges(id){
+  const fo=fortschritt(id);const d=document.createElement('div');d.className='fortschritt-badges';d.dataset.fortschrittBadges=id;
+  if(fo.f>=fo.g){const b=document.createElement('span');b.className='f-badge f-badge-fertig';b.textContent='\u2713 Abschnitt ist fertig';d.appendChild(b)}
+  else{
+    if(fo.f>0){const b=document.createElement('span');b.className='f-badge f-badge-gruen';b.textContent='\u2713 '+fo.f+(fo.f===1?' Bereich':' Bereiche');d.appendChild(b)}
+    const offen=fo.g-fo.f-fo.ki;if(offen+fo.ki>0){const b=document.createElement('span');b.className='f-badge f-badge-grau';b.textContent=(offen+fo.ki)+(offen+fo.ki===1?' Bereich':' Bereiche');d.appendChild(b)}
+  }
+  return d;
+}
+function aktualisiereUI(){
+  document.querySelectorAll('[data-fortschritt-badges]').forEach(el=>{const id=el.dataset.fortschrittBadges;const neu=mkFortschrittBadges(id);el.replaceWith(neu)});
+  // A1 stichpunkt badges
+  document.querySelectorAll('[data-a1-key]').forEach(titel=>{
+    const key=titel.dataset.a1Key;const alt=titel.querySelector('.stichpunkt-badge');const neu=mkStichpunktBadge(key);
+    if(alt&&neu){alt.replaceWith(neu)}else if(alt&&!neu){alt.remove()}else if(!alt&&neu){titel.appendChild(neu)}
+  });
+  document.querySelectorAll('[data-a2-fertig]').forEach(fb=>{const key=fb.dataset.a2Fertig;fb.disabled=!(daten[key]||'').trim()});
+  document.querySelectorAll('[data-a3-fertig]').forEach(fb=>{const key=fb.dataset.a3Fertig;fb.disabled=!hatA3Bearbeitet(key)});
+  document.querySelectorAll('[data-a4-fertig]').forEach(fb=>{const key=fb.dataset.a4Fertig;fb.disabled=!hatA4Bearbeitet(key)});
+}
+function mkAbschnitt(titel,klappbar,id){
+  const c=document.createElement('div');c.className='abschnitt';if(!klappbar)c.classList.add('nicht-klappbar');
+  const h=document.createElement('div');h.className='abschnitt-header';
+  const td=document.createElement('div');td.className='abschnitt-titel';
+  if(klappbar){const ch=document.createElement('span');ch.className='chevron';ch.textContent='\u25b6';td.appendChild(ch)}
+  td.appendChild(document.createTextNode(titel));
+  const r=document.createElement('div');r.className='abschnitt-header-rechts';
+  h.appendChild(td);h.appendChild(r);c.appendChild(h);
+  const inh=document.createElement('div');inh.className='abschnitt-inhalt';c.appendChild(inh);
+  if(klappbar&&id){
+    if(daten.abschnittOffen[id]){if(!daten.abschnittBesucht)daten.abschnittBesucht={};daten.abschnittBesucht[id]=true;speichereState()}
+    if(!daten.abschnittBesucht)daten.abschnittBesucht={};
+    const besucht=daten.abschnittBesucht[id];
+    const fo=fortschritt(id);const istKomplett=fo.f>=fo.g&&besucht;
+    if(daten.abschnittOffen[id]){
+      c.classList.add('offen');r.appendChild(mkFortschrittBadges(id));
+    }else{
+      if(istKomplett)c.classList.add('abschnitt-fertig-bg');
+      if(besucht)r.appendChild(mkFortschrittBadges(id));
+    }
+    h.addEventListener('click',e=>{if(e.target.closest('button,.toggle-wrapper,.toggle-option'))return;if(daten.abschnittOffen[id]){if(abschliessenFn[id])abschliessenFn[id]();return}daten.abschnittOffen[id]=true;if(!daten.abschnittBesucht)daten.abschnittBesucht={};daten.abschnittBesucht[id]=true;if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen[id]=false;speichereState();render()});
+  }
+  return c;
+}
+function mkBereich(titel){
+  const d=document.createElement('div');d.className='bereich';
+  const h=document.createElement('div');h.className='bereich-header';
+  const t=document.createElement('div');t.className='bereich-titel';t.textContent=titel;
+  h.appendChild(t);d.appendChild(h);
+  const i=document.createElement('div');i.className='bereich-inhalt';d.appendChild(i);return d;
+}
+
+// ============================================================
+// LÜCKENTEXT RENDER
+// ============================================================
+function renderLT(key,mitUmwandeln){
+  const d=document.createElement('div');d.className='lueckentext';
+  const saetze=LT()[key],luecken=daten[key+'_luecken']||{};
+  saetze.forEach((satz,si)=>{
+    const last=si===saetze.length-1;
+    const sd=document.createElement('div');sd.className='lueckentext-satz'+(last&&mitUmwandeln?' lueckentext-letzte-zeile':'');
+    let di=0;
+    for(const teil of satz.t){
+      if(typeof teil==='string'){const sp=document.createElement('span');sp.textContent=teil;sd.appendChild(sp)}
+      else{
+        const k=satz.id+'_'+di,w=luecken[k]||'',isFrei=w&&!teil.o.includes(w)&&w!=='';
+        if(isFrei){
+          const wr=document.createElement('span');wr.className='luecke-freitext-wrapper';
+          const inp=document.createElement('input');inp.type='text';inp.className='luecke-freitext';inp.value=w;
+          inp.addEventListener('input',e=>{if(!daten[key+'_luecken'])daten[key+'_luecken']={};daten[key+'_luecken'][k]=e.target.value;speichereState()});
+          const cl=document.createElement('button');cl.className='luecke-close';cl.textContent='\u2715';
+          cl.addEventListener('click',()=>{daten[key+'_luecken'][k]='';speichereState();render()});
+          wr.appendChild(inp);wr.appendChild(cl);sd.appendChild(wr);
+        }else{
+          const sel=document.createElement('select');sel.className='luecke-dropdown';
+          sel.add(new Option('\u25be w\u00e4hlen',''));
+          for(const o of teil.o){const op=new Option(o,o);if(w===o)op.selected=true;sel.add(op)}
+          sel.add(new Option('\u2026','___freitext___'));
+          sel.addEventListener('change',e=>{if(!daten[key+'_luecken'])daten[key+'_luecken']={};if(e.target.value==='___freitext___'){daten[key+'_luecken'][k]=' ';speichereState();render()}else{daten[key+'_luecken'][k]=e.target.value;speichereState()}});
+          sd.appendChild(sel);
+        }
+        di++;
+      }
+    }
+    if(last&&mitUmwandeln){
+      const ub=document.createElement('button');ub.className='btn--umwandeln';ub.textContent='In Text umwandeln';
+      ub.addEventListener('click',()=>{const sp=ltZuSP(key);daten[key+'_freitext']=sp||freitextVorlagen[key]||'';daten[key+'_modus']='freitext';speichereState();render()});
+      sd.appendChild(ub);
+    }
+    d.appendChild(sd);
+  });
+  return d;
+}
+
+// ============================================================
+// VORFRAGE / SINNE
+// ============================================================
+function renderVorfrage(){
+  const d=document.createElement('div');d.className='vorfrage';
+  const l=document.createElement('span');l.className='vorfrage-label';l.textContent='Mehrsprachigkeit:';d.appendChild(l);
+  const bs=document.createElement('span');bs.className='vorfrage-buttons';
+  ['Ja','Nein','Keine Infos'].forEach(opt=>{
+    const b=document.createElement('button');b.className='vorfrage-btn'+(daten.sprache_mehrsprachig===opt?' active':'');
+    b.textContent=opt;b.addEventListener('click',()=>{daten.sprache_mehrsprachig=opt;speichereState();render()});bs.appendChild(b);
+  });
+  d.appendChild(bs);
+  if(daten.sprache_mehrsprachig==='Ja'||daten.sprache_mehrsprachig==='Nein'){
+    const extra=document.createElement('div');extra.className='vorfrage-extra';
+    const inp=document.createElement('input');inp.type='text';inp.className='feld-input';
+    inp.placeholder=daten.sprache_mehrsprachig==='Ja'?'Sprachen, st\u00e4rkere Sprache':'Erstsprache';
+    inp.value=daten.sprache_sprachen||'';inp.style.maxWidth='400px';
+    inp.addEventListener('input',e=>{daten.sprache_sprachen=e.target.value;speichereState()});
+    extra.appendChild(inp);d.appendChild(extra);
+  }
+  return d;
+}
+function renderSinne(){
+  const d=document.createElement('div');d.className='feld';
+  const l=document.createElement('div');l.className='feld-label';l.textContent='Auff\u00e4lligkeiten bei:';d.appendChild(l);
+  const bd=document.createElement('div');bd.className='sinnes-buttons';
+  ['Ger\u00e4uschempfindlichkeit','Ber\u00fchrungsempfindlichkeit','Lichtempfindlichkeit','Unterempfindlichkeit (sucht starke Reize)'].forEach(o=>{
+    const b=document.createElement('button');b.className='sinnes-btn'+((daten.motorik_sinne||[]).includes(o)?' active':'');b.textContent=o;
+    b.addEventListener('click',()=>{const i=daten.motorik_sinne.indexOf(o);if(i>=0)daten.motorik_sinne.splice(i,1);else daten.motorik_sinne.push(o);if(!daten.motorik_sinne.length)daten.motorik_sinne_text='';speichereState();render()});bd.appendChild(b)});
+  d.appendChild(bd);if((daten.motorik_sinne||[]).length>0)d.appendChild(mkTF(null,'motorik_sinne_text','Kurze Erkl\u00e4rung.'));return d;
+}
+
+// ============================================================
+// A3 HELFER
+// ============================================================
+const altersTexte={kognition:'- Kognition, Konzentration und Ausdauer sind altersgem\u00e4\u00df entwickelt.',sprache:'- Sprache und Kommunikation sind altersgem\u00e4\u00df entwickelt.',emotionen:'- Emotionen und Verhalten sind altersgem\u00e4\u00df entwickelt.',sozial:'- Soziale Interaktion ist altersgem\u00e4\u00df entwickelt.',motorik:'- Motorik und Wahrnehmung sind altersgem\u00e4\u00df entwickelt.'};
+const WHConfig={
+  kognition:[{k:'kognition_washilft',l:()=>'Was hilft '+N()+', konzentriert zu arbeiten? Was hat sich bew\u00e4hrt?',p:'- Braucht zu Beginn einer Arbeitsphase Begleitung\n- Nach 10min pr\u00fcfen, ob er/sie tr\u00e4umt oder eine Frage hat'}],
+  sprache:[{k:'sprache_washilft',l:()=>'Was unterst\u00fctzt '+N()+' dabei, sich auszudr\u00fccken oder Sprache zu verstehen?',p:'- Versteht Anweisungen besser, wenn sie mit Gestik begleitet werden'}],
+  emotionen:[{k:'emotionen_anzeichen',l:()=>'Woran merkst du, dass es '+N()+' nicht gut geht oder eine Eskalation bevorsteht?',p:'- Beginnt, andere zu provozieren, wenn er/sie \u00fcberfordert ist.'},{k:'emotionen_washilft',l:()=>'Was hilft '+N()+', wenn es schwierig wird? Was hat sich bew\u00e4hrt?',p:'- Reagiert gut auf ruhige 1:1-Ansprache'},{k:'emotionen_vermeiden',l:()=>'Was sollte vermieden werden?',p:'- Vor der Gruppe ansprechen'}],
+  sozial:[{k:'sozial_washilft',l:()=>'Was unterst\u00fctzt '+N()+' im sozialen Miteinander?',p:'- Profitiert von fester Partnerarbeit mit einem ruhigen Kind'}],
+  motorik:[{k:'motorik_washilft',l:()=>'Was hilft '+N()+' im Bereich Motorik oder Wahrnehmung?',p:'- Schreibt besser mit Stiftverdickung'}]
+};
+
+function hatA3Bearbeitet(key){
+  const l=daten[key+'_luecken']||{};const hatL=Object.values(l).some(v=>v&&v.trim());
+  const ft=(daten[key+'_freitext']||'').trim();const vorl=(freitextVorlagen[key]||'').trim();const alt=(altersTexte[key]||'').trim();
+  const ftEigen=ft&&ft!==vorl&&ft!==alt;
+  const extras=['_washilft','_anzeichen','_vermeiden'].map(s=>key+s).filter(k=>daten[k]!==undefined);
+  const hatE=extras.some(k=>(daten[k]||'').trim());
+  return hatL||!!ftEigen||hatE;
+}
+function istNurAlters(key){return(daten[key+'_freitext']||'').trim()===(altersTexte[key]||'').trim()}
+function resetA3(key){
+  daten[key+'_luecken']={};daten[key+'_freitext']='';
+  for(const k of Object.keys(daten)){if((k.startsWith(key+'_wash')||k.startsWith(key+'_anz')||k.startsWith(key+'_verm'))&&typeof daten[k]==='string')daten[k]=''}
+  if(key==='motorik'){daten.motorik_sinne=[];daten.motorik_sinne_text=''}
+  if(key==='sprache'){daten.sprache_mehrsprachig=null;daten.sprache_sprachen=''}
+}
+function hatA4Bearbeitet(key){
+  if(key==='lernstrategien'){const l=daten.lernstrategien_luecken||{};const hatL=Object.values(l).some(v=>v&&v.trim());const ft=(daten.lernstrategien_freitext||'').trim();const vorl=(freitextVorlagen.lernstrategien||'').trim();const nae=(daten.lernstrategien_naechster||'').trim();return hatL||(!!ft&&ft!==vorl)||!!nae}
+  const df=leerState()[key+'_details'];const detChanged=(daten[key+'_details']||'').trim()!==df.trim();return!!daten[key+'_niveau']||detChanged||(daten[key+'_naechster']||'').trim()!=='';
+}
+
+const UNFERTIG_TEXT='Klicke bei allen angefangenen Bereichen auf "Fertig", bis sie gr\u00fcn gef\u00e4rbt sind, oder auf "Zur\u00fccksetzen".';
+
+// ============================================================
+// RENDER
+// ============================================================
+function render(){
+  const app=document.getElementById('app');app.innerHTML='';
+  if(mergeModus){renderMerge(app);return}
+  app.appendChild(renderA0());app.appendChild(renderA1());app.appendChild(renderA2());app.appendChild(renderA3());app.appendChild(renderA4());
+  const ed=document.createElement('div');ed.className='export-row';
+  const tb=document.createElement('button');tb.className='btn btn--secondary';tb.textContent='Textvorschau';tb.style.padding='12px 28px';
+  tb.addEventListener('click',textVorschau);ed.appendChild(tb);
+  const eb=document.createElement('button');eb.className='btn btn--primary';eb.textContent='fk3-Datei speichern';eb.style.padding='12px 28px';
+  eb.addEventListener('click',exportFn);ed.appendChild(eb);app.appendChild(ed);
+  const ft=document.createElement('footer');ft.className='app-footer';
+  ft.innerHTML='<strong>Quellhinweis</strong><br>Das Tool wurde von Marius L\u00fccking, dem F\u00f6rderkoordinator der Clara-Grunwald-Schule in Hamburg, entwickelt. Feedback oder Bugreports bitte an <a href="mailto:marius.luecking@cgs-hh.de" style="color:var(--clr-accent-dark)">marius.luecking@cgs-hh.de</a> senden.';
+  app.appendChild(ft);
+}
+
+function renderA0(){
+  const c=mkAbschnitt('fk3 P\u00e4dagogische Planungshilfe',false);c.classList.add('offen','nicht-klappbar');
+  const r=c.querySelector('.abschnitt-header-rechts');
+  const ib=document.createElement('button');ib.className='btn btn--secondary btn--small';ib.textContent='Planungshilfe importieren';
+  ib.addEventListener('click',e=>{e.stopPropagation();importFn()});
+  const mb=document.createElement('button');mb.className='btn btn--secondary btn--small';mb.textContent='Mehrere zusammenf\u00fchren';
+  mb.addEventListener('click',e=>{e.stopPropagation();zeigeMergePopup()});
+  const nb=document.createElement('button');nb.className='btn btn--secondary btn--small';nb.textContent='Neue Planungshilfe';
+  nb.addEventListener('click',e=>{e.stopPropagation();if(daten.kindName||daten.meinName||daten.staerken||mergeModus)zeigePopup('Neue Planungshilfe starten.','Die vorhandenen Eingaben werden dabei gel\u00f6scht.',()=>{mergeModus=false;mergeQuellen=[];mergeOriginal={};speichereMerge();daten=leerState();speichereState();render()});else{daten=leerState();speichereState();render()}});
+  r.appendChild(nb);r.appendChild(ib);r.appendChild(mb);
+  const inh=c.querySelector('.abschnitt-inhalt');const row=document.createElement('div');row.className='feld-row';
+  // Name with 3s debounced render
+  const nameFeld=document.createElement('div');nameFeld.className='feld';
+  const nameLabel=document.createElement('label');nameLabel.className='feld-label';nameLabel.textContent='Name des Kindes';nameFeld.appendChild(nameLabel);
+  const nameInp=document.createElement('input');nameInp.type='text';nameInp.className='feld-input';nameInp.placeholder='Vorname Nachname';nameInp.value=daten.kindName||'';
+  nameInp.addEventListener('input',e=>{daten.kindName=e.target.value;speichereState();if(nameTimer)clearTimeout(nameTimer);nameTimer=setTimeout(()=>render(),3000)});
+  nameFeld.appendChild(nameInp);row.appendChild(nameFeld);
+  row.appendChild(mkInput('Dein Name','meinName','text','Dein K\u00fcrzel'));
+  row.appendChild(mkInput('Erstellungsdatum','datum','date',''));
+  inh.appendChild(row);return c;
+}
+
+function renderA1(){
+  const c=mkAbschnitt('1. \u00dcberblick zum aktuellen Stand',true,'a1');const inh=c.querySelector('.abschnitt-inhalt');
+  const t1=document.createElement('div');t1.className='a1-bereich-titel';t1.dataset.a1Key='staerken';t1.textContent='St\u00e4rken / Ressourcen';
+  const b1=mkStichpunktBadge('staerken');if(b1)t1.appendChild(b1);inh.appendChild(t1);
+  inh.appendChild(mkTF('Was kann '+N()+' gut? Wo zeigt '+N()+' Motivation oder besondere F\u00e4higkeiten?','staerken','- Hilfsbereit bei j\u00fcngeren Kindern\n- Geht gerne in die Mathewerkstatt'));
+  const t2=document.createElement('div');t2.className='a1-bereich-titel';t2.dataset.a1Key='auffaelligkeiten';t2.textContent='Auff\u00e4lligkeiten / Unterst\u00fctzungsbedarf';
+  const b2=mkStichpunktBadge('auffaelligkeiten');if(b2)t2.appendChild(b2);inh.appendChild(t2);
+  inh.appendChild(mkTF('Was bereitet dem Team Sorgen? M\u00f6glichst konkret beschreiben, mit Ursachen/Ausl\u00f6sern.','auffaelligkeiten','- Konkrete Situationen beschreiben, die regelm\u00e4\u00dfig auftreten.'));
+  const t3=document.createElement('div');t3.className='a1-bereich-titel';t3.dataset.a1Key='kinderperspektive';t3.textContent='Kinderperspektive';
+  const b3=mkStichpunktBadge('kinderperspektive');if(b3)t3.appendChild(b3);inh.appendChild(t3);
+  const kpFeld=document.createElement('div');kpFeld.className='feld';
+  const kpLabel=document.createElement('div');kpLabel.className='feld-label-inline';
+  ['Was macht '+N()+' in der Schule gerne?','Was f\u00e4llt '+N()+' nach eigener Aussage schwer?','Hat '+N()+' W\u00fcnsche oder Sorgen ge\u00e4u\u00dfert?'].forEach(q=>{const s=document.createElement('span');s.textContent=q;kpLabel.appendChild(s)});
+  kpFeld.appendChild(kpLabel);
+  const kpTa=document.createElement('textarea');kpTa.className='feld-textarea';kpTa.value=daten.kinderperspektive||'';
+  kpTa.addEventListener('input',e=>{daten.kinderperspektive=e.target.value;speichereState();autoH(e.target);aktualisiereUI()});
+  kpFeld.appendChild(kpTa);setTimeout(()=>autoH(kpTa),0);inh.appendChild(kpFeld);
+  const a1Abschliessen=()=>{if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a1=true;daten.abschnittOffen.a1=false;speichereState();render()};
+  abschliessenFn.a1=a1Abschliessen;
+  const af=document.createElement('div');af.className='abschnitt-footer';
+  const afb=document.createElement('button');afb.className='btn btn--fertig';afb.textContent='Abschnitt abschlie\u00dfen';
+  afb.addEventListener('click',a1Abschliessen);
+  af.appendChild(afb);inh.appendChild(af);return c;
+}
+
+// ---- A2: Bereich-Cards like Deutsch ----
+function renderA2(){
+  const c=mkAbschnitt('2. Lebenswelt & Hintergr\u00fcnde',true,'a2');const inh=c.querySelector('.abschnitt-inhalt');
+  const bereiche=[
+    {key:'fruehkindlich',label:'Fr\u00fchkindliche Entwicklung',ueber:'Ausf\u00fcllen nach einem Anamnesegespr\u00e4ch.',ph:'Schwangerschaft / Geburt / Fr\u00fche Meilensteine / Besondere Ereignisse'},
+    {key:'kita',label:'KiTa-Zeit',ueber:'Ausf\u00fcllen nach Sichtung des KiTa-Berichtes.',ph:'Nennenswertes aus den Berichten (z.B. I-Status, Sprachf\u00f6rderung, \u00a728a schulpflichtig in der VS, Sozialverhalten).'},
+    {key:'viereinhalb',label:'4\u00bd-J\u00e4hrigen / Bericht des S\u00c4D',ueber:'Ausf\u00fcllen nach Sichtung der Berichte.',ph:'Nennenswertes aus den Berichten.'},
+    {key:'familienleben',label:'Familienleben',ueber:'Familienkonstellation, Mehrsprachigkeit, Flucht-/Migrationserfahrung, Kontakt zum ASD, Zusammenarbeit mit Eltern',ph:'Jede Info hilft.'},
+    {key:'allergien',label:'Allergien / Medikamente / Medizinische Diagnosen',ueber:null,ph:''},
+    {key:'therapien',label:'Therapien',ueber:null,ph:'aktuelle / vergangene Therapien'},
+    {key:'freizeit',label:'Freizeitaktivit\u00e4ten',ueber:null,ph:'Interessen, Hobbys, Vereinszugeh\u00f6rigkeit?'}
+  ];
+  for(const b of bereiche){
+    const bereich=mkBereich(b.label);const header=bereich.querySelector('.bereich-header');const bi=bereich.querySelector('.bereich-inhalt');
+    const status=daten[b.key+'_status'];const hatText=(daten[b.key]||'').trim();
+    if(status==='fertig'){
+      bereich.classList.add('fertig-bg','eingeklappt');
+      const badge=document.createElement('button');badge.className='btn--fertig-badge';badge.textContent='Fertig';
+      bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Fertig'});
+      badge.addEventListener('click',e=>{e.stopPropagation();daten[b.key+'_status']='bearbeiten';speichereState();render()});
+      header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten[b.key+'_status']='bearbeiten';speichereState();render()});
+    }else if(status==='keine-infos'){
+      bereich.classList.add('keine-infos-bg','eingeklappt');
+      const badge=document.createElement('button');badge.className='btn--keine-infos-badge';badge.textContent='Keine Infos';
+      bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Keine Infos'});
+      badge.addEventListener('click',e=>{e.stopPropagation();daten[b.key+'_status']='bearbeiten';speichereState();render()});
+      header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten[b.key+'_status']='bearbeiten';speichereState();render()});
+    }else{
+      // status is null or 'bearbeiten'
+      const istOffen=status==='bearbeiten';
+      const tgl=document.createElement('div');tgl.className='toggle-wrapper';
+      ['Bearbeiten','Keine Infos'].forEach(opt=>{
+        const mv=opt==='Bearbeiten'?'bearbeiten':'keine-infos';
+        const isActive=istOffen&&mv==='bearbeiten';
+        const btn=document.createElement('button');btn.className='toggle-option'+(isActive?' active':'');btn.textContent=opt;
+        btn.addEventListener('click',e=>{
+          e.stopPropagation();
+          if(mv==='keine-infos'){daten[b.key+'_status']='keine-infos';speichereState();render()}
+          else{daten[b.key+'_status']='bearbeiten';speichereState();render()}
+        });tgl.appendChild(btn);
+      });
+      header.appendChild(tgl);
+      if(!istOffen){
+        bereich.classList.add('eingeklappt');
+        header.addEventListener('click',e=>{if(e.target.closest('.toggle-wrapper'))return;daten[b.key+'_status']='bearbeiten';speichereState();render()});
+      }else{
+        // Bearbeiten mode - show textarea + footer
+        if(b.ueber){const lbl=document.createElement('label');lbl.className='feld-label';lbl.textContent=b.ueber;bi.appendChild(lbl)}
+        const ta=document.createElement('textarea');ta.className='feld-textarea';if(b.ph)ta.placeholder=b.ph;ta.value=daten[b.key]||'';
+        ta.addEventListener('input',e=>{daten[b.key]=e.target.value;speichereState();autoH(e.target);aktualisiereUI()});
+        bi.appendChild(ta);setTimeout(()=>autoH(ta),0);
+        const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+        const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a2Fertig=b.key;
+        if(!(daten[b.key]||'').trim())fb.disabled=true;
+        fb.addEventListener('click',()=>{daten[b.key+'_status']='fertig';speichereState();render()});
+        const ki=document.createElement('button');ki.className='btn btn--keine-infos';ki.textContent='Keine Infos';
+        ki.addEventListener('click',()=>{daten[b.key]='';daten[b.key+'_status']='keine-infos';speichereState();render()});
+        const zb=document.createElement('button');zb.className='btn btn--danger-outline';zb.textContent='Zur\u00fccksetzen';
+        zb.addEventListener('click',()=>{
+          if((daten[b.key]||'').trim()){zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{daten[b.key]='';daten[b.key+'_status']=null;speichereState();render()})}
+          else{daten[b.key]='';daten[b.key+'_status']=null;speichereState();render()}
+        });
+        fo.appendChild(fb);fo.appendChild(ki);fo.appendChild(zb);bi.appendChild(fo);
+      }
+    }
+    inh.appendChild(bereich);
+  }
+  const a2Abschliessen=()=>{for(const b of bereiche){const s=daten[b.key+'_status'];if(s!=='fertig'&&s!=='keine-infos')daten[b.key+'_status']=(daten[b.key]||'').trim()?'fertig':'keine-infos'}if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a2=true;daten.abschnittOffen.a2=false;speichereState();render()};
+  abschliessenFn.a2=a2Abschliessen;
+  const af=document.createElement('div');af.className='abschnitt-footer';
+  const afb=document.createElement('button');afb.className='btn btn--fertig';afb.textContent='Abschnitt abschlie\u00dfen';
+  afb.addEventListener('click',a2Abschliessen);
+  af.appendChild(afb);inh.appendChild(af);return c;
+}
+
+// ---- A3 ----
+function renderA3(){
+  const c=mkAbschnitt('3. Entwicklungsbereiche',true,'a3');const inh=c.querySelector('.abschnitt-inhalt');
+  const bereiche=[{key:'kognition',titel:'Kognition, Konzentration und Ausdauer',vf:false,sinne:false},{key:'sprache',titel:'Sprache / Kommunikation',vf:true,sinne:false},{key:'emotionen',titel:'Emotionen / Verhalten',vf:false,sinne:false},{key:'sozial',titel:'Soziale Interaktion',vf:false,sinne:false},{key:'motorik',titel:'Motorik / Wahrnehmung',vf:false,sinne:true}];
+  for(const b of bereiche){
+    const bereich=mkBereich(b.titel);const header=bereich.querySelector('.bereich-header');const bi=bereich.querySelector('.bereich-inhalt');
+    const modus=daten[b.key+'_modus'];const fertig=daten[b.key+'_fertig'];
+    if(fertig){
+      bereich.classList.add('fertig-bg','eingeklappt');
+      const badge=document.createElement('button');badge.className='btn--fertig-badge';badge.textContent='Fertig';
+      bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Fertig'});
+      badge.addEventListener('click',e=>{e.stopPropagation();daten[b.key+'_fertig']=false;speichereState();render()});
+      header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten[b.key+'_fertig']=false;speichereState();render()});
+    }else{
+      const tgl=document.createElement('div');tgl.className='toggle-wrapper';
+      ['Hilfen','Freitext','Altersgem\u00e4\u00df'].forEach(opt=>{
+        const mv=opt==='Altersgem\u00e4\u00df'?'altersgemaeß':opt.toLowerCase();
+        const btn=document.createElement('button');btn.className='toggle-option'+(modus===mv?' active':'');btn.textContent=opt;
+        btn.addEventListener('click',e=>{
+          e.stopPropagation();if(modus===mv)return;
+          const nurAlters=modus==='altersgemaeß'&&istNurAlters(b.key)&&!hatExtras(b.key);
+          if(modus&&!nurAlters&&hatA3Bearbeitet(b.key)){
+            zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{resetA3(b.key);daten[b.key+'_modus']=mv;if(mv==='altersgemaeß')daten[b.key+'_freitext']=altersTexte[b.key];else if(mv==='freitext')daten[b.key+'_freitext']=freitextVorlagen[b.key]||'';speichereState();render()});
+          }else{resetA3(b.key);daten[b.key+'_modus']=mv;if(mv==='altersgemaeß')daten[b.key+'_freitext']=altersTexte[b.key];else if(mv==='freitext')daten[b.key+'_freitext']=freitextVorlagen[b.key]||'';speichereState();render()}
+        });tgl.appendChild(btn);
+      });
+      header.appendChild(tgl);
+      if(!modus){bereich.classList.add('eingeklappt');header.addEventListener('click',e=>{if(e.target.closest('.toggle-wrapper'))return;daten[b.key+'_modus']='hilfen';speichereState();render()})}
+      else renderA3Inhalt(bi,b.key,modus,b);
+    }
+    inh.appendChild(bereich);
+  }
+  const a3Abschliessen=()=>{
+    let unfertig=false;
+    for(const b of bereiche){
+      if(daten[b.key+'_fertig'])continue;
+      if(!daten[b.key+'_modus'])continue;
+      if(daten[b.key+'_modus']==='altersgemaeß'){daten[b.key+'_fertig']=true;continue}
+      if(!hatA3Bearbeitet(b.key)){resetA3(b.key);daten[b.key+'_modus']=null;continue}
+      unfertig=true;
+    }
+    if(unfertig){zeigePopup('Bereiche fertigstellen',UNFERTIG_TEXT,()=>{},true);return}
+    if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a3=true;daten.abschnittOffen.a3=false;speichereState();render();
+  };
+  abschliessenFn.a3=a3Abschliessen;
+  const af=document.createElement('div');af.className='abschnitt-footer';
+  const afb=document.createElement('button');afb.className='btn btn--fertig';afb.textContent='Abschnitt abschlie\u00dfen';
+  afb.addEventListener('click',a3Abschliessen);
+  af.appendChild(afb);inh.appendChild(af);return c;
+}
+function hatExtras(key){return['_washilft','_anzeichen','_vermeiden'].map(s=>key+s).filter(k=>daten[k]!==undefined).some(k=>(daten[k]||'').trim())}
+
+function renderA3Inhalt(bi,key,modus,b){
+  if(modus==='hilfen'){
+    if(b.vf)bi.appendChild(renderVorfrage());
+    bi.appendChild(renderLT(key,true));
+    bi.appendChild(spacer());
+    if(b.sinne){bi.appendChild(renderSinne());bi.appendChild(spacer())}
+    for(const wh of WHConfig[key])bi.appendChild(mkTF(wh.l(),wh.k,wh.p));
+    const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+    const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a3Fertig=key;fb.disabled=!hatA3Bearbeitet(key);
+    fb.addEventListener('click',()=>{const sp=ltZuSP(key);daten[key+'_freitext']=sp||freitextVorlagen[key]||'';daten[key+'_modus']='freitext';daten[key+'_fertig']=true;speichereState();render()});
+    fo.appendChild(fb);fo.appendChild(mkZurueck(key));bi.appendChild(fo);
+  }else if(modus==='freitext'){
+    if(b.vf)bi.appendChild(renderVorfrage());
+    if(!(daten[key+'_freitext']||'').trim())daten[key+'_freitext']=freitextVorlagen[key]||'';
+    bi.appendChild(mkTF(null,key+'_freitext',''));
+    if(b.sinne){bi.appendChild(renderSinne());bi.appendChild(spacer())}
+    for(const wh of WHConfig[key])bi.appendChild(mkTF(wh.l(),wh.k,wh.p));
+    const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+    const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a3Fertig=key;fb.disabled=!hatA3Bearbeitet(key);
+    fb.addEventListener('click',()=>{daten[key+'_fertig']=true;speichereState();render()});
+    fo.appendChild(fb);fo.appendChild(mkZurueck(key));bi.appendChild(fo);
+  }else if(modus==='altersgemaeß'){
+    if(!(daten[key+'_freitext']||'').trim())daten[key+'_freitext']=altersTexte[key];
+    bi.appendChild(mkTF(null,key+'_freitext',''));
+    const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+    const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';
+    fb.addEventListener('click',()=>{daten[key+'_fertig']=true;speichereState();render()});
+    const zb=document.createElement('button');zb.className='btn btn--danger-outline';zb.textContent='Zur\u00fccksetzen';
+    zb.addEventListener('click',()=>{
+      if(istNurAlters(key)&&!hatExtras(key)){resetA3(key);daten[key+'_modus']=null;daten[key+'_fertig']=false;speichereState();render()}
+      else zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{resetA3(key);daten[key+'_modus']=null;daten[key+'_fertig']=false;speichereState();render()})
+    });
+    fo.appendChild(fb);fo.appendChild(zb);bi.appendChild(fo);
+  }
+}
+function spacer(){const d=document.createElement('div');d.className='spacer-20';return d}
+function mkZurueck(key){
+  const zb=document.createElement('button');zb.className='btn btn--danger-outline';zb.textContent='Zur\u00fccksetzen';
+  zb.addEventListener('click',()=>{
+    if(hatA3Bearbeitet(key))zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{resetA3(key);daten[key+'_modus']=null;daten[key+'_fertig']=false;speichereState();render()});
+    else{resetA3(key);daten[key+'_modus']=null;daten[key+'_fertig']=false;speichereState();render()}
+  });return zb;
+}
+
+// ---- A4 ----
+function renderA4(){
+  const c=mkAbschnitt('4. Lernen & fachliche Kompetenzen',true,'a4');const inh=c.querySelector('.abschnitt-inhalt');
+  inh.appendChild(renderA4LS());inh.appendChild(renderA4Fach('deutsch','Deutsch'));inh.appendChild(renderA4Fach('mathe','Mathe'));
+  const a4Abschliessen=()=>{
+    let unfertig=false;
+    for(const key of ['lernstrategien','deutsch','mathe']){
+      if(daten[key+'_fertig'])continue;if(!daten[key+'_modus'])continue;
+      if(!hatA4Bearbeitet(key)){if(key==='lernstrategien'){daten.lernstrategien_luecken={};daten.lernstrategien_freitext='';daten.lernstrategien_naechster='';daten.lernstrategien_modus=null}else{daten[key+'_niveau']='';daten[key+'_details']=leerState()[key+'_details'];daten[key+'_naechster']='';daten[key+'_modus']=null}continue}
+      unfertig=true;
+    }
+    if(unfertig){zeigePopup('Bereiche fertigstellen',UNFERTIG_TEXT,()=>{},true);return}
+    if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a4=true;daten.abschnittOffen.a4=false;speichereState();render();
+  };
+  abschliessenFn.a4=a4Abschliessen;
+  const af=document.createElement('div');af.className='abschnitt-footer';
+  const afb=document.createElement('button');afb.className='btn btn--fertig';afb.textContent='Abschnitt abschlie\u00dfen';
+  afb.addEventListener('click',a4Abschliessen);
+  af.appendChild(afb);inh.appendChild(af);return c;
+}
+
+function renderA4LS(){
+  const key='lernstrategien';const bereich=mkBereich('Lernstrategien');
+  const header=bereich.querySelector('.bereich-header');const bi=bereich.querySelector('.bereich-inhalt');
+  const modus=daten.lernstrategien_modus;const fertig=daten.lernstrategien_fertig;
+  if(fertig){
+    bereich.classList.add('fertig-bg','eingeklappt');
+    const badge=document.createElement('button');badge.className='btn--fertig-badge';badge.textContent='Fertig';
+    bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Fertig'});
+    badge.addEventListener('click',e=>{e.stopPropagation();daten.lernstrategien_fertig=false;speichereState();render()});
+    header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten.lernstrategien_fertig=false;speichereState();render()});
+  }else{
+    const tgl=document.createElement('div');tgl.className='toggle-wrapper';
+    ['Hilfen','Freitext'].forEach(opt=>{
+      const mv=opt.toLowerCase();const btn=document.createElement('button');btn.className='toggle-option'+(modus===mv?' active':'');btn.textContent=opt;
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();if(modus===mv)return;
+        const hatAend=Object.values(daten.lernstrategien_luecken||{}).some(v=>v&&v.trim());const ft=(daten.lernstrategien_freitext||'').trim();const vorl=(freitextVorlagen.lernstrategien||'').trim();const ftChanged=ft&&ft!==vorl;
+        if(modus&&(hatAend||ftChanged)){zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{daten.lernstrategien_luecken={};daten.lernstrategien_freitext=mv==='freitext'?freitextVorlagen.lernstrategien:'';daten.lernstrategien_modus=mv;speichereState();render()})}
+        else{daten.lernstrategien_luecken={};daten.lernstrategien_freitext=mv==='freitext'?freitextVorlagen.lernstrategien:'';daten.lernstrategien_modus=mv;speichereState();render()}
+      });tgl.appendChild(btn);
+    });
+    header.appendChild(tgl);
+    if(!modus){bereich.classList.add('eingeklappt');header.addEventListener('click',e=>{if(e.target.closest('.toggle-wrapper'))return;daten.lernstrategien_modus='hilfen';speichereState();render()})}
+    else if(modus==='hilfen'){
+      bi.appendChild(renderLT('lernstrategien',true));
+      bi.appendChild(spacer());
+      bi.appendChild(mkTF('Welche Lernstrategie sollte '+N()+' erlernen oder besser nutzen?','lernstrategien_naechster','- Bewusst Pausen nehmen\n- Hilfskette nutzen statt zu raten'));
+      const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+      const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a4Fertig='lernstrategien';fb.disabled=!hatA4Bearbeitet('lernstrategien');
+      fb.addEventListener('click',()=>{const sp=ltZuSP('lernstrategien');daten.lernstrategien_freitext=sp||freitextVorlagen.lernstrategien;daten.lernstrategien_modus='freitext';daten.lernstrategien_fertig=true;speichereState();render()});
+      fo.appendChild(fb);fo.appendChild(mkA4Zurueck('lernstrategien'));bi.appendChild(fo);
+    }else{
+      if(!(daten.lernstrategien_freitext||'').trim())daten.lernstrategien_freitext=freitextVorlagen.lernstrategien;
+      bi.appendChild(mkTF(null,'lernstrategien_freitext',''));
+      bi.appendChild(mkTF('Welche Lernstrategie sollte '+N()+' erlernen oder besser nutzen?','lernstrategien_naechster','- Bewusst Pausen nehmen\n- Hilfskette nutzen statt zu raten'));
+      const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+      const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a4Fertig='lernstrategien';fb.disabled=!hatA4Bearbeitet('lernstrategien');
+      fb.addEventListener('click',()=>{daten.lernstrategien_fertig=true;speichereState();render()});
+      fo.appendChild(fb);fo.appendChild(mkA4Zurueck('lernstrategien'));bi.appendChild(fo);
+    }
+  }
+  return bereich;
+}
+function mkA4Zurueck(key){
+  const zb=document.createElement('button');zb.className='btn btn--danger-outline';zb.textContent='Zur\u00fccksetzen';
+  zb.addEventListener('click',()=>{
+    if(hatA4Bearbeitet(key))zeigePopup('Eingaben l\u00f6schen?','Achtung, die Eingaben gehen verloren.',()=>{resetA4(key);render()});
+    else{resetA4(key);render()}
+  });return zb;
+}
+function resetA4(key){
+  if(key==='lernstrategien'){daten.lernstrategien_luecken={};daten.lernstrategien_freitext='';daten.lernstrategien_naechster='';daten.lernstrategien_modus=null;daten.lernstrategien_fertig=false}
+  else{daten[key+'_niveau']='';daten[key+'_details']=leerState()[key+'_details'];daten[key+'_naechster']='';daten[key+'_modus']=null;daten[key+'_fertig']=false}
+  speichereState();
+}
+
+function renderA4Fach(key,titel){
+  const bereich=mkBereich(titel);const header=bereich.querySelector('.bereich-header');const bi=bereich.querySelector('.bereich-inhalt');
+  const modus=daten[key+'_modus'];const fertig=daten[key+'_fertig'];
+  if(fertig&&modus==='keine-infos'){
+    bereich.classList.add('keine-infos-bg','eingeklappt');
+    const badge=document.createElement('button');badge.className='btn--keine-infos-badge';badge.textContent='Keine Infos';
+    bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Keine Infos'});
+    badge.addEventListener('click',e=>{e.stopPropagation();daten[key+'_fertig']=false;daten[key+'_modus']='bearbeiten';speichereState();render()});
+    header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten[key+'_fertig']=false;daten[key+'_modus']='bearbeiten';speichereState();render()});
+  }else if(fertig){
+    bereich.classList.add('fertig-bg','eingeklappt');
+    const badge=document.createElement('button');badge.className='btn--fertig-badge';badge.textContent='Fertig';
+    bereich.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});bereich.addEventListener('mouseleave',()=>{badge.textContent='Fertig'});
+    badge.addEventListener('click',e=>{e.stopPropagation();daten[key+'_fertig']=false;daten[key+'_modus']='bearbeiten';speichereState();render()});
+    header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;daten[key+'_fertig']=false;daten[key+'_modus']='bearbeiten';speichereState();render()});
+  }else{
+    const tgl=document.createElement('div');tgl.className='toggle-wrapper';
+    ['Bearbeiten','Keine Infos'].forEach(opt=>{
+      const mv=opt==='Bearbeiten'?'bearbeiten':'keine-infos';
+      const btn=document.createElement('button');btn.className='toggle-option'+(modus===mv?' active':'');btn.textContent=opt;
+      btn.addEventListener('click',e=>{e.stopPropagation();if(modus===mv)return;if(mv==='keine-infos'){daten[key+'_modus']='keine-infos';daten[key+'_fertig']=true;speichereState();render()}else{daten[key+'_modus']='bearbeiten';daten[key+'_fertig']=false;speichereState();render()}});tgl.appendChild(btn);
+    });
+    header.appendChild(tgl);
+    if(!modus){bereich.classList.add('eingeklappt');header.addEventListener('click',e=>{if(e.target.closest('.toggle-wrapper'))return;daten[key+'_modus']='bearbeiten';speichereState();render()})}
+    else if(modus==='bearbeiten'){
+      const nDiv=document.createElement('div');nDiv.className='niveau-satz feld';
+      nDiv.appendChild(document.createTextNode('Der Leistungsstand in '+titel+' entspricht ungef\u00e4hr dem Niveau '));
+      const nSel=document.createElement('select');nSel.className='luecke-dropdown';nSel.add(new Option('\u25be w\u00e4hlen',''));
+      for(const nv of niveauOptionen){const o=new Option(nv,nv);if(daten[key+'_niveau']===nv)o.selected=true;nSel.add(o)}
+      nSel.addEventListener('change',e=>{daten[key+'_niveau']=e.target.value;speichereState()});
+      nDiv.appendChild(nSel);nDiv.appendChild(document.createTextNode('.'));bi.appendChild(nDiv);
+      bi.appendChild(mkTF(null,key+'_details',''));
+      bi.appendChild(mkTF('N\u00e4chster Lernschritt',key+'_naechster','Was soll '+N()+' in '+titel+' als n\u00e4chstes lernen?'));
+      const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+      const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.dataset.a4Fertig=key;fb.disabled=!hatA4Bearbeitet(key);
+      fb.addEventListener('click',()=>{daten[key+'_fertig']=true;speichereState();render()});
+      fo.appendChild(fb);fo.appendChild(mkA4Zurueck(key));bi.appendChild(fo);
+    }
+  }
+  return bereich;
+}
+
+// ============================================================
+// MERGE
+// ============================================================
+let mergeDateien=[];
+
+function hatInhalt(){return !!(daten.kindName||daten.meinName||daten.staerken||daten.auffaelligkeiten)}
+
+function zeigeMergePopup(){
+  if(hatInhalt()){
+    zeigePopup('Eingaben vorhanden','Beim Mergen gehen die aktuellen Eingaben verloren. Ggf. vorher exportieren.',()=>{oeffneMergeDialog()});
+  }else oeffneMergeDialog();
+}
+function oeffneMergeDialog(){
+  mergeDateien=[];aktualisiereMergeTabelle();
+  document.getElementById('merge-overlay').classList.add('sichtbar');
+}
+document.getElementById('merge-abbrechen').addEventListener('click',()=>{document.getElementById('merge-overlay').classList.remove('sichtbar')});
+document.getElementById('merge-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('merge-overlay').classList.remove('sichtbar')});
+
+// Dropzone
+const dz=document.getElementById('merge-dropzone');const mfi=document.getElementById('merge-file-input');
+dz.addEventListener('click',()=>mfi.click());
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');leseMergeDateien(e.dataTransfer.files)});
+mfi.addEventListener('change',e=>{leseMergeDateien(e.target.files);mfi.value=''});
+
+function leseMergeDateien(files){
+  for(const f of files){
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{const d=JSON.parse(ev.target.result);mergeDateien.push({dateiname:f.name,kuerzel:d.meinName||'??',kindName:d.kindName||'',daten:d});aktualisiereMergeTabelle()}catch(e){alert('Datei konnte nicht gelesen werden: '+f.name)}
+    };r.readAsText(f);
+  }
+}
+function aktualisiereMergeTabelle(){
+  const tbl=document.getElementById('merge-liste');const tbody=document.getElementById('merge-tbody');
+  tbody.innerHTML='';
+  if(!mergeDateien.length){tbl.style.display='none';document.getElementById('merge-starten').disabled=true;return}
+  tbl.style.display='';document.getElementById('merge-starten').disabled=mergeDateien.length<2;
+  mergeDateien.forEach((md,i)=>{
+    const tr=document.createElement('tr');
+    const td1=document.createElement('td');td1.textContent=md.dateiname;tr.appendChild(td1);
+    const td2=document.createElement('td');
+    const inp=document.createElement('input');inp.value=md.kuerzel;
+    inp.addEventListener('input',e=>{mergeDateien[i].kuerzel=e.target.value});
+    td2.appendChild(inp);tr.appendChild(td2);
+    const td3=document.createElement('td');td3.textContent=md.kindName||'';tr.appendChild(td3);
+    const td4=document.createElement('td');td4.style.textAlign='right';
+    const btn=document.createElement('button');btn.className='btn--entfernen';btn.textContent='Entfernen';
+    btn.addEventListener('click',()=>{mergeDateien.splice(i,1);aktualisiereMergeTabelle()});
+    td4.appendChild(btn);tr.appendChild(td4);
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('merge-starten').addEventListener('click',()=>{
+  document.getElementById('merge-overlay').classList.remove('sichtbar');
+  if(window.goatcounter)goatcounter.count({path:'fk3-merge-gestartet',event:true});
+  mergeQuellen=mergeDateien.map((md,i)=>({kuerzel:md.kuerzel,daten:Object.assign(leerState(),md.daten),farbe:MERGE_FARBEN[i%7],bg:MERGE_BG[i%7],text:MERGE_TEXT[i%7]}));
+  daten=leerState();
+  daten.kindName=mergeQuellen[0].daten.kindName||'';
+  daten.meinName='Team';daten.datum=heutigesDatum();
+  mergeFillAll();
+  mergeModus=true;speichereMerge();speichereState();render();
+});
+
+function mergeFillAll(){
+  // A1
+  daten.staerken=mergeTextFeld('staerken');
+  daten.auffaelligkeiten=mergeTextFeld('auffaelligkeiten');
+  daten.kinderperspektive=mergeTextFeld('kinderperspektive');
+  // A2
+  for(const k of ['fruehkindlich','kita','viereinhalb','familienleben','allergien','therapien','freizeit']){
+    daten[k]=mergeTextFeld(k);daten[k+'_status']=daten[k].trim()?'bearbeiten':null;
+  }
+  // A3
+  for(const k of ['kognition','sprache','emotionen','sozial','motorik']){
+    for(const q of mergeQuellen){if(q.daten[k+'_modus']==='hilfen'){const lt=ltZuSPMerge(k,q.daten);if(lt)q.daten[k+'_freitext']=lt;q.daten[k+'_modus']='freitext'}}
+    daten[k+'_freitext']=mergeTextFeld(k+'_freitext');
+    daten[k+'_modus']=daten[k+'_freitext'].trim()?'freitext':null;
+    const whKeys=(WHConfig[k]||[]).map(w=>w.k);
+    for(const wk of whKeys)daten[wk]=mergeTextFeld(wk);
+    if(k==='sprache'){
+      // Mehrsprachigkeit als Text integrieren
+      const mInfos=[];
+      for(const q of mergeQuellen){
+        if(q.daten.sprache_mehrsprachig==='Ja'){let t='Ja';if((q.daten.sprache_sprachen||'').trim())t+=' \u2013 '+q.daten.sprache_sprachen.trim();mInfos.push(t+' ('+q.kuerzel+')')}
+        else if(q.daten.sprache_mehrsprachig==='Nein'){let t='Nein';if((q.daten.sprache_sprachen||'').trim())t+=' \u2013 '+q.daten.sprache_sprachen.trim();mInfos.push(t+' ('+q.kuerzel+')')}
+      }
+      if(mInfos.length){const mText='Mehrsprachigkeit: '+mInfos.join(', ');daten[k+'_freitext']=mText+'\n\n'+daten[k+'_freitext']}
+    }
+    if(k==='motorik'){
+      const allSinne=[];for(const q of mergeQuellen)for(const s of(q.daten.motorik_sinne||[]))if(!allSinne.includes(s))allSinne.push(s);
+      daten.motorik_sinne=allSinne;daten.motorik_sinne_text=mergeTextFeld('motorik_sinne_text');
+    }
+  }
+  // A4
+  daten.lernstrategien_freitext=mergeTextFeld('lernstrategien_freitext');
+  daten.lernstrategien_naechster=mergeTextFeld('lernstrategien_naechster');
+  daten.lernstrategien_modus=daten.lernstrategien_freitext.trim()?'freitext':null;
+  for(const k of ['deutsch','mathe']){
+    const niveaus=[];
+    for(const q of mergeQuellen){const nv=q.daten[k+'_niveau'];if(nv)niveaus.push(nv+' ('+q.kuerzel+')')}
+    const nivText=niveaus.length?'Niveaueinsch\u00e4tzungen: '+niveaus.join(', '):'';
+    let details=mergeTextFeld(k+'_details');
+    if(nivText&&details)details=nivText+'\n\n'+details;else if(nivText)details=nivText;
+    daten[k+'_details']=details;
+    daten[k+'_naechster']=mergeTextFeld(k+'_naechster');
+    daten[k+'_niveau']='';
+    daten[k+'_modus']=details.trim()?'bearbeiten':null;
+  }
+  // Originale speichern f\u00fcr Zur\u00fccksetzen
+  mergeOriginal={};
+  const keys=['staerken','auffaelligkeiten','kinderperspektive',
+    'fruehkindlich','kita','viereinhalb','familienleben','allergien','therapien','freizeit',
+    'kognition_freitext','kognition_washilft','sprache_freitext','sprache_washilft',
+    'emotionen_freitext','emotionen_anzeichen','emotionen_washilft','emotionen_vermeiden',
+    'sozial_freitext','sozial_washilft','motorik_freitext','motorik_washilft','motorik_sinne_text',
+    'lernstrategien_freitext','lernstrategien_naechster',
+    'deutsch_details','deutsch_naechster','mathe_details','mathe_naechster'];
+  for(const k of keys)mergeOriginal[k]=daten[k]||'';
+  mergeOriginal.motorik_sinne=[...(daten.motorik_sinne||[])];
+}
+
+function ltZuSPMerge(key,qDaten){
+  const s=LT()[key];if(!s)return'';const l=qDaten[key+'_luecken']||{};const r=[];
+  for(const z of s){let g=false,t='',d=0;for(const p of z.t){if(typeof p==='string')t+=p;else{const k=z.id+'_'+d,w=l[k];if(w&&w.trim()){g=true;t+=w}else t+='[\u2026]';d++}}if(g)r.push('- '+t.trim())}
+  return r.join('\n');
+}
+
+function mergeTextFeld(key){
+  const texte=[];const zeilen={};
+  for(const q of mergeQuellen){
+    let t=(q.daten[key]||'').trim();
+    // Skip default templates
+    if(key.endsWith('_details')){const fach=key.replace('_details','');const df=(leerState()[key]||'').trim();if(t===df)t=''}
+    if(key.endsWith('_freitext')){const bk=key.replace('_freitext','');const vorl=(freitextVorlagen[bk]||'').trim();const alt=(altersTexte[bk]||'').trim();if(t===vorl)t=''}
+    if(t)texte.push({kuerzel:q.kuerzel,text:t});
+  }
+  if(!texte.length)return'';
+  if(texte.length===1)return'(von '+texte[0].kuerzel+')\n'+texte[0].text;
+  // Duplikat-Erkennung
+  const allLines={};const dupes=[];
+  for(const te of texte){const lines=te.text.split('\n').map(l=>l.trim()).filter(l=>l);for(const l of lines){if(!allLines[l])allLines[l]=[];allLines[l].push(te.kuerzel)}}
+  const dupeLines=[];const dupeSet=new Set();
+  for(const[line,ks]of Object.entries(allLines)){if(ks.length>1){dupeLines.push('- '+line.replace(/^- /,'')+' ('+[...new Set(ks)].join(', ')+')');dupeSet.add(line)}}
+  const result=[];
+  if(dupeLines.length){result.push('(Doppelnennung)');result.push(...dupeLines);result.push('')}
+  for(const te of texte){
+    const eigenLines=te.text.split('\n').map(l=>l.trim()).filter(l=>l&&!dupeSet.has(l));
+    if(eigenLines.length){result.push('(von '+te.kuerzel+')');result.push(eigenLines.join('\n'));result.push('')}
+  }
+  return result.join('\n').trim();
+}
+
+function mergeKeineInfos(key){
+  const ohne=[];
+  for(const q of mergeQuellen){
+    let hatContent=false;
+    if(key==='staerken'||key==='auffaelligkeiten'||key==='kinderperspektive')hatContent=!!(q.daten[key]||'').trim();
+    else if(['fruehkindlich','kita','viereinhalb','familienleben','allergien','therapien','freizeit'].includes(key)){
+      hatContent=(q.daten[key+'_status']==='fertig'&&(q.daten[key]||'').trim())}
+    else if(['kognition','sprache','emotionen','sozial','motorik'].includes(key))hatContent=!!q.daten[key+'_fertig'];
+    else if(key==='lernstrategien')hatContent=!!q.daten.lernstrategien_fertig;
+    else if(key==='deutsch'||key==='mathe')hatContent=!!(q.daten[key+'_fertig']&&q.daten[key+'_modus']!=='keine-infos');
+    if(!hatContent)ohne.push(q.kuerzel);
+  }
+  return ohne;
+}
+
+// ============================================================
+// MERGE RENDER
+// ============================================================
+function renderMerge(app){
+  const bar=document.createElement('div');bar.className='merge-bar';
+  bar.textContent='Teamversion \u2014 '+mergeQuellen.length+' Dateien zusammengef\u00fchrt';
+  const xb=document.createElement('button');xb.className='merge-x';xb.textContent='Merge beenden';
+  xb.addEventListener('click',()=>{zeigePopup('Merge beenden?','Die Teamversion wird verworfen.',()=>{mergeModus=false;mergeQuellen=[];mergeOriginal={};speichereMerge();daten=leerState();speichereState();render()})});
+  bar.appendChild(xb);app.appendChild(bar);
+  app.appendChild(renderMergeA0());
+  // A1
+  const a1=mkAbschnitt('1. \u00dcberblick zum aktuellen Stand',true,'a1');
+  if(daten.abschnittOffen.a1)a1.classList.add('offen');
+  const a1i=a1.querySelector('.abschnitt-inhalt');
+  a1i.appendChild(renderMergeTextfeld('St\u00e4rken / Ressourcen','staerken','staerken'));
+  a1i.appendChild(renderMergeTextfeld('Auff\u00e4lligkeiten / Unterst\u00fctzungsbedarf','auffaelligkeiten','auffaelligkeiten'));
+  a1i.appendChild(renderMergeTextfeld('Kinderperspektive','kinderperspektive','kinderperspektive'));
+  const a1close=()=>{if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a1=true;daten.abschnittOffen.a1=false;speichereState();render()};
+  abschliessenFn.a1=a1close;const a1f=document.createElement('div');a1f.className='abschnitt-footer';const a1fb=document.createElement('button');a1fb.className='btn btn--fertig';a1fb.textContent='Abschnitt abschlie\u00dfen';a1fb.addEventListener('click',a1close);a1f.appendChild(a1fb);a1i.appendChild(a1f);app.appendChild(a1);
+  // A2
+  const a2b=[{key:'fruehkindlich',label:'Fr\u00fchkindliche Entwicklung'},{key:'kita',label:'KiTa-Zeit'},{key:'viereinhalb',label:'4\u00bd-J\u00e4hrigen / Bericht des S\u00c4D'},{key:'familienleben',label:'Familienleben'},{key:'allergien',label:'Allergien / Medikamente / Medizinische Diagnosen'},{key:'therapien',label:'Therapien'},{key:'freizeit',label:'Freizeitaktivit\u00e4ten'}];
+  const a2=mkAbschnitt('2. Lebenswelt & Hintergr\u00fcnde',true,'a2');
+  if(daten.abschnittOffen.a2)a2.classList.add('offen');
+  const a2i=a2.querySelector('.abschnitt-inhalt');
+  for(const b of a2b){
+    a2i.appendChild(mkMergeCard(b.label,b.key,[{key:b.key}],
+      ()=>daten[b.key+'_status'],
+      ()=>{daten[b.key+'_status']='fertig';speichereState();render()},
+      ()=>{daten[b.key]='';daten[b.key+'_status']='keine-infos';speichereState();render()},
+      ()=>{daten[b.key]=mergeOriginal[b.key]||'';daten[b.key+'_status']='bearbeiten';speichereState();render()},
+      ()=>{daten[b.key+'_status']='bearbeiten';speichereState();render()}
+    ));
+  }
+  const a2close=()=>{
+    let offen=false;
+    for(const b of a2b){const s=daten[b.key+'_status'];if(s!=='fertig'&&s!=='keine-infos')offen=true}
+    if(offen){zeigePopup('Bereiche fertigstellen','Klicke bei allen Bereichen auf \u201eFertig\u201c oder \u201eKeine Infos\u201c.',()=>{},true);return}
+    if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a2=true;daten.abschnittOffen.a2=false;speichereState();render()
+  };
+  abschliessenFn.a2=a2close;const a2f=document.createElement('div');a2f.className='abschnitt-footer';const a2fb=document.createElement('button');a2fb.className='btn btn--fertig';a2fb.textContent='Abschnitt abschlie\u00dfen';a2fb.addEventListener('click',a2close);a2f.appendChild(a2fb);a2i.appendChild(a2f);app.appendChild(a2);
+  // A3
+  const a3b=[{key:'kognition',titel:'Kognition, Konzentration und Ausdauer'},{key:'sprache',titel:'Sprache / Kommunikation'},{key:'emotionen',titel:'Emotionen / Verhalten'},{key:'sozial',titel:'Soziale Interaktion'},{key:'motorik',titel:'Motorik / Wahrnehmung'}];
+  const a3=mkAbschnitt('3. Entwicklungsbereiche',true,'a3');
+  if(daten.abschnittOffen.a3)a3.classList.add('offen');
+  const a3i=a3.querySelector('.abschnitt-inhalt');
+  for(const b of a3b){
+    const felder=[{key:b.key+'_freitext'}];
+    const whc=WHConfig[b.key]||[];
+    for(const wh of whc)if((mergeOriginal[wh.k]||'').trim())felder.push({key:wh.k,label:wh.l()});
+    if(b.key==='motorik'&&(daten.motorik_sinne||[]).length>0){felder.push({key:'motorik_sinne_text',label:'Auff\u00e4lligkeiten bei: '+daten.motorik_sinne.join(', ')})}
+    a3i.appendChild(mkMergeCard(b.titel,b.key,felder,
+      ()=>daten[b.key+'_fertig']?'fertig':(daten[b.key+'_modus']==='keine-infos'?'keine-infos':null),
+      ()=>{daten[b.key+'_fertig']=true;daten[b.key+'_modus']='freitext';speichereState();render()},
+      ()=>{for(const f of felder)daten[f.key]='';if(b.key==='motorik')daten.motorik_sinne=[];daten[b.key+'_fertig']=false;daten[b.key+'_modus']='keine-infos';speichereState();render()},
+      ()=>{for(const f of felder)daten[f.key]=mergeOriginal[f.key]||'';if(b.key==='motorik')daten.motorik_sinne=[...(mergeOriginal.motorik_sinne||[])];daten[b.key+'_fertig']=false;daten[b.key+'_modus']='freitext';speichereState();render()},
+      ()=>{daten[b.key+'_fertig']=false;daten[b.key+'_modus']='freitext';speichereState();render()}
+    ));
+  }
+  const a3close=()=>{
+    let offen=false;
+    for(const b of a3b){if(!daten[b.key+'_fertig']&&daten[b.key+'_modus']!=='keine-infos')offen=true}
+    if(offen){zeigePopup('Bereiche fertigstellen','Klicke bei allen Bereichen auf \u201eFertig\u201c oder \u201eKeine Infos\u201c.',()=>{},true);return}
+    if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a3=true;daten.abschnittOffen.a3=false;speichereState();render()
+  };
+  abschliessenFn.a3=a3close;const a3f=document.createElement('div');a3f.className='abschnitt-footer';const a3fb=document.createElement('button');a3fb.className='btn btn--fertig';a3fb.textContent='Abschnitt abschlie\u00dfen';a3fb.addEventListener('click',a3close);a3f.appendChild(a3fb);a3i.appendChild(a3f);app.appendChild(a3);
+  // A4
+  const a4=mkAbschnitt('4. Lernen & fachliche Kompetenzen',true,'a4');
+  if(daten.abschnittOffen.a4)a4.classList.add('offen');
+  const a4i=a4.querySelector('.abschnitt-inhalt');
+  // Lernstrategien
+  const lsFelder=[{key:'lernstrategien_freitext'}];
+  if((mergeOriginal.lernstrategien_naechster||'').trim())lsFelder.push({key:'lernstrategien_naechster',label:'\u25b8 N\u00e4chster Schritt'});
+  a4i.appendChild(mkMergeCard('Lernstrategien','lernstrategien',lsFelder,
+    ()=>daten.lernstrategien_fertig?'fertig':(daten.lernstrategien_modus==='keine-infos'?'keine-infos':null),
+    ()=>{daten.lernstrategien_fertig=true;daten.lernstrategien_modus='freitext';speichereState();render()},
+    ()=>{for(const f of lsFelder)daten[f.key]='';daten.lernstrategien_fertig=false;daten.lernstrategien_modus='keine-infos';speichereState();render()},
+    ()=>{for(const f of lsFelder)daten[f.key]=mergeOriginal[f.key]||'';daten.lernstrategien_fertig=false;daten.lernstrategien_modus='freitext';speichereState();render()},
+    ()=>{daten.lernstrategien_fertig=false;daten.lernstrategien_modus='freitext';speichereState();render()}
+  ));
+  // Deutsch / Mathe
+  for(const fach of [{key:'deutsch',titel:'Deutsch'},{key:'mathe',titel:'Mathe'}]){
+    const fFelder=[{key:fach.key+'_details'}];
+    if((mergeOriginal[fach.key+'_naechster']||'').trim())fFelder.push({key:fach.key+'_naechster',label:'\u25b8 N\u00e4chster Lernschritt'});
+    a4i.appendChild(mkMergeCard(fach.titel,fach.key,fFelder,
+      ()=>daten[fach.key+'_fertig']?'fertig':(daten[fach.key+'_modus']==='keine-infos'?'keine-infos':null),
+      ()=>{daten[fach.key+'_fertig']=true;daten[fach.key+'_modus']='bearbeiten';speichereState();render()},
+      ()=>{for(const f of fFelder)daten[f.key]='';daten[fach.key+'_fertig']=true;daten[fach.key+'_modus']='keine-infos';speichereState();render()},
+      ()=>{for(const f of fFelder)daten[f.key]=mergeOriginal[f.key]||'';daten[fach.key+'_fertig']=false;daten[fach.key+'_modus']='bearbeiten';speichereState();render()},
+      ()=>{daten[fach.key+'_fertig']=false;daten[fach.key+'_modus']='bearbeiten';speichereState();render()}
+    ));
+  }
+  const a4close=()=>{
+    let offen=false;
+    if(!daten.lernstrategien_fertig&&daten.lernstrategien_modus!=='keine-infos')offen=true;
+    if(!daten.deutsch_fertig&&daten.deutsch_modus!=='keine-infos')offen=true;
+    if(!daten.mathe_fertig&&daten.mathe_modus!=='keine-infos')offen=true;
+    if(offen){zeigePopup('Bereiche fertigstellen','Klicke bei allen Bereichen auf \u201eFertig\u201c oder \u201eKeine Infos\u201c.',()=>{},true);return}
+    if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};daten.abschnittAbgeschlossen.a4=true;daten.abschnittOffen.a4=false;speichereState();render()
+  };
+  abschliessenFn.a4=a4close;const a4f=document.createElement('div');a4f.className='abschnitt-footer';const a4fb=document.createElement('button');a4fb.className='btn btn--fertig';a4fb.textContent='Abschnitt abschlie\u00dfen';a4fb.addEventListener('click',a4close);a4f.appendChild(a4fb);a4i.appendChild(a4f);app.appendChild(a4);
+  // Export + Footer
+  const ed=document.createElement('div');ed.className='export-row';
+  const tb=document.createElement('button');tb.className='btn btn--secondary';tb.textContent='Textvorschau';tb.style.padding='12px 28px';
+  tb.addEventListener('click',textVorschau);ed.appendChild(tb);
+  const eb=document.createElement('button');eb.className='btn btn--primary';eb.textContent='fk3-Datei speichern';eb.style.padding='12px 28px';
+  eb.addEventListener('click',exportFn);ed.appendChild(eb);app.appendChild(ed);
+  const ft=document.createElement('footer');ft.className='app-footer';
+  ft.innerHTML='<strong>Quellhinweis</strong><br>Das Tool wurde von Marius L\u00fccking, dem F\u00f6rderkoordinator der Clara-Grunwald-Schule in Hamburg, entwickelt. Feedback oder Bugreports bitte an <a href="mailto:marius.luecking@cgs-hh.de" style="color:var(--clr-accent-dark)">marius.luecking@cgs-hh.de</a> senden.';
+  app.appendChild(ft);
+}
+
+function mkMergeCard(titel,keineInfosKey,felder,statusFn,onFertig,onKeineInfos,onReset,onReopen){
+  const status=statusFn();
+  const be=mkBereich(titel);const header=be.querySelector('.bereich-header');const bi=be.querySelector('.bereich-inhalt');
+  if(status==='fertig'){
+    be.classList.add('fertig-bg','eingeklappt');
+    const badge=document.createElement('button');badge.className='btn--fertig-badge';badge.textContent='Fertig';
+    be.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});be.addEventListener('mouseleave',()=>{badge.textContent='Fertig'});
+    badge.addEventListener('click',e=>{e.stopPropagation();onReopen()});
+    header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;onReopen()});
+  }else if(status==='keine-infos'){
+    be.classList.add('keine-infos-bg','eingeklappt');
+    const badge=document.createElement('button');badge.className='btn--keine-infos-badge';badge.textContent='Keine Infos';
+    be.addEventListener('mouseenter',()=>{badge.textContent='Bearbeiten'});be.addEventListener('mouseleave',()=>{badge.textContent='Keine Infos'});
+    badge.addEventListener('click',e=>{e.stopPropagation();onReset()});
+    header.appendChild(badge);header.addEventListener('click',e=>{if(e.target.closest('button'))return;onReset()});
+  }else{
+    const ohne=mergeKeineInfos(keineInfosKey);
+    if(ohne.length)bi.appendChild(mkKeineInfosHinweis(ohne));
+    for(const f of felder){
+      if(f.label){const sl=document.createElement('div');sl.className='sub-label';sl.innerHTML='<span class="pfeil">\u25b8</span> '+f.label.replace(/^\u25b8 /,'');bi.appendChild(sl)}
+      bi.appendChild(mkMergeTF(null,f.key));
+    }
+    const fo=document.createElement('div');fo.className='bereich-footer-buttons';
+    const fb=document.createElement('button');fb.className='btn btn--fertig';fb.textContent='Fertig';fb.addEventListener('click',onFertig);
+    const kb=document.createElement('button');kb.className='btn btn--keine-infos';kb.textContent='Keine Infos';kb.addEventListener('click',onKeineInfos);
+    const rb=document.createElement('button');rb.className='btn btn--danger-outline';rb.textContent='Zur\u00fccksetzen';rb.addEventListener('click',onReset);
+    fo.appendChild(fb);fo.appendChild(kb);fo.appendChild(rb);bi.appendChild(fo);
+  }
+  return be;
+}
+function renderMergeA0(){
+  const c=document.createElement('div');c.className='abschnitt nicht-klappbar offen';
+  const h=document.createElement('div');h.className='abschnitt-header';
+  const td=document.createElement('div');td.className='abschnitt-titel';td.textContent='fk3 P\u00e4dagogische Planungshilfe \u2014 Teamversion';
+  h.appendChild(td);c.appendChild(h);
+  const inh=document.createElement('div');inh.className='abschnitt-inhalt';inh.style.display='block';
+  const row=document.createElement('div');row.className='feld-row';
+  row.appendChild(mkReadonly('Name des Kindes',daten.kindName));
+  row.appendChild(mkReadonly('K\u00fcrzel','Team'));
+  row.appendChild(mkReadonly('Datum',daten.datum));
+  inh.appendChild(row);
+  const ql=document.createElement('div');ql.style.marginTop='12px';
+  const qLabel=document.createElement('label');qLabel.className='feld-label';qLabel.textContent='Quellen';ql.appendChild(qLabel);
+  const qr=document.createElement('div');qr.className='quellen-row';
+  mergeQuellen.forEach((q,i)=>{const ch=document.createElement('span');ch.className='quellen-chip';ch.style.background=q.bg;ch.style.color=q.text;ch.textContent=q.kuerzel;qr.appendChild(ch)});
+  ql.appendChild(qr);inh.appendChild(ql);c.appendChild(inh);return c;
+}
+function mkReadonly(label,val){
+  const d=document.createElement('div');d.className='feld';d.style.flex='1';d.style.minWidth='150px';
+  const l=document.createElement('label');l.className='feld-label';l.textContent=label;d.appendChild(l);
+  const inp=document.createElement('input');inp.className='feld-input';inp.value=val||'';inp.readOnly=true;inp.style.background='var(--clr-surface)';
+  d.appendChild(inp);return d;
+}
+function renderMergeTextfeld(label,keineInfosKey,textKey){
+  const d=document.createElement('div');d.style.marginBottom='14px';
+  const t=document.createElement('div');t.className='a1-bereich-titel';t.dataset.a1Key=textKey;t.textContent=label;
+  const badge=mkStichpunktBadge(textKey);if(badge)t.appendChild(badge);
+  d.appendChild(t);
+  const ohne=mergeKeineInfos(keineInfosKey);
+  if(ohne.length)d.appendChild(mkKeineInfosHinweis(ohne));
+  const ta=document.createElement('textarea');ta.className='feld-textarea';ta.value=daten[textKey]||'';
+  ta.addEventListener('input',e=>{daten[textKey]=e.target.value;speichereState();ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';aktualisiereUI()});
+  d.appendChild(ta);setTimeout(()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'},0);return d;
+}
+function mkMergeTF(label,key){
+  const d=document.createElement('div');d.className='feld';
+  if(label){const l=document.createElement('label');l.className='feld-label';l.textContent=label;d.appendChild(l)}
+  const ta=document.createElement('textarea');ta.className='feld-textarea';ta.value=daten[key]||'';
+  ta.addEventListener('input',e=>{daten[key]=e.target.value;speichereState();ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'});
+  d.appendChild(ta);setTimeout(()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'},0);return d;
+}
+function mkKeineInfosHinweis(kuerzelListe){
+  const d=document.createElement('div');d.className='keine-infos-hinweis';
+  d.textContent=kuerzelListe.join(' und ')+' ha'+(kuerzelListe.length===1?'t':'ben')+' keine Infos gegeben.';
+  return d;
+}
+
+function validiereExport(){
+  if(!mergeModus){
+    if(!(daten.kindName||'').trim()){zeigePopup('Name fehlt','Bitte trage den Namen des Kindes ein, bevor du exportierst.',()=>{},true);return false}
+    if(!(daten.meinName||'').trim()){zeigePopup('K\u00fcrzel fehlt','Bitte trage dein K\u00fcrzel ein, bevor du exportierst.',()=>{},true);return false}
+  }
+  if(!daten.abschnittAbgeschlossen)daten.abschnittAbgeschlossen={};
+  if(!daten.abschnittBesucht)daten.abschnittBesucht={};
+  // Nie geöffnete Abschnitte gelten automatisch als abgeschlossen
+  for(const aid of ['a1','a2','a3','a4'])if(!daten.abschnittBesucht[aid])daten.abschnittAbgeschlossen[aid]=true;
+  // Alle Badges sichtbar machen
+  let mussteRendern=false;
+  for(const aid of ['a1','a2','a3','a4'])if(!daten.abschnittBesucht[aid]){daten.abschnittBesucht[aid]=true;mussteRendern=true}
+  if(mussteRendern){speichereState();render()}
+  const namen={a1:'Abschnitt 1',a2:'Abschnitt 2',a3:'Abschnitt 3',a4:'Abschnitt 4'};
+  const fehlend=[];
+  for(const aid of ['a1','a2','a3','a4'])if(!daten.abschnittAbgeschlossen[aid])fehlend.push(namen[aid]);
+  if(fehlend.length){
+    zeigePopup('Abschnitte nicht abgeschlossen','Bitte schlie\u00dfe alle Abschnitte ab. Klicke auf \u201eAbschnitt abschlie\u00dfen\u201c bei:\n\u2022 '+fehlend.join('\n\u2022 '),()=>{},true);return false;
+  }
+  return true;
+}
+function zaehlZeilen(text){if(!text)return 0;return text.split('\n').filter(z=>z.trim()).length}
+function zaehlWoerter(text){if(!text||!text.trim())return 0;return text.trim().split(/\s+/).filter(w=>w).length}
+function mkStichpunktBadge(key){
+  const t=daten[key]||'';const z=zaehlZeilen(t);const w=zaehlWoerter(t);
+  if(z<1&&w<1)return null;
+  const sp=document.createElement('span');sp.dataset.stichpunkt=key;
+  if(w>25){sp.className='stichpunkt-badge gruen';sp.textContent=w+' W\u00f6rter'}
+  else{sp.className='stichpunkt-badge '+(z>=3?'gruen':'grau');sp.textContent=z+(z===1?' Stichpunkt':' Stichpunkte')}
+  return sp;
+}
+
+function bereiteExportDaten(){
+  // Convert remaining hilfen to freitext
+  for(const key of ['kognition','sprache','emotionen','sozial','motorik','lernstrategien']){
+    const mk=key+'_modus';if(daten[mk]==='hilfen'){const st=ltZuSP(key);if(st){daten[key+'_freitext']=st;daten[mk]='freitext'}}}
+  speichereState();
+}
+
+function exportFn(){
+  if(!validiereExport())return;
+  bereiteExportDaten();
+  if(window.goatcounter)goatcounter.count({path:mergeModus?'fk3-team-gespeichert':'fk3-gespeichert',event:true});
+  const blob=new Blob([JSON.stringify(daten,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+  const suffix=mergeModus?'-Teamversion':'';
+  a.download='Planungshilfe_'+(daten.kindName||'Planungshilfe').replace(/\s+/g,'_')+'_'+(daten.datum||heutigesDatum())+suffix+'.fk3';
+  a.click();URL.revokeObjectURL(url);
+}
+
+function generiereText(){
+  bereiteExportDaten();
+  const n=N(),z=[];
+  const linie='\u2500'.repeat(36);
+  z.push('fk3 P\u00e4dagogische Planungshilfe');
+  z.push('Kind: '+n);
+  z.push('Ausgef\u00fcllt von: '+(daten.meinName||''));
+  z.push('Datum: '+(daten.datum||''));
+  z.push('');
+
+  // A1
+  const a1z=[];
+  const st=(daten.staerken||'').trim();if(st){a1z.push('ST\u00c4RKEN / RESSOURCEN');a1z.push(st);a1z.push('');a1z.push('')}
+  const au=(daten.auffaelligkeiten||'').trim();if(au){a1z.push('AUFF\u00c4LLIGKEITEN / UNTERST\u00dcTZUNGSBEDARF');a1z.push(au);a1z.push('');a1z.push('')}
+  const kp=(daten.kinderperspektive||'').trim();if(kp){a1z.push('KINDERPERSPEKTIVE');a1z.push(kp);a1z.push('');a1z.push('')}
+  if(a1z.length){z.push(linie);z.push('1. \u00dcberblick zum aktuellen Stand');z.push(linie);z.push('');z.push(...a1z)}
+
+  // A2
+  const a2b=[
+    {key:'fruehkindlich',label:'FR\u00dcHKINDLICHE ENTWICKLUNG'},
+    {key:'kita',label:'KITA-ZEIT'},
+    {key:'viereinhalb',label:'4\u00bd-J\u00c4HRIGEN / BERICHT DES S\u00c4D'},
+    {key:'familienleben',label:'FAMILIENLEBEN'},
+    {key:'allergien',label:'ALLERGIEN / MEDIKAMENTE / MEDIZINISCHE DIAGNOSEN'},
+    {key:'therapien',label:'THERAPIEN'},
+    {key:'freizeit',label:'FREIZEITAKTIVIT\u00c4TEN'}
+  ];
+  const a2z=[];
+  for(const b of a2b){
+    const s=daten[b.key+'_status'],t=(daten[b.key]||'').trim();
+    if(s==='fertig'&&t){a2z.push(b.label);a2z.push(t);a2z.push('');a2z.push('')}
+  }
+  if(a2z.length){z.push(linie);z.push('2. Lebenswelt & Hintergr\u00fcnde');z.push(linie);z.push('');z.push(...a2z)}
+
+  // A3
+  const a3b=[
+    {key:'kognition',titel:'KOGNITION, KONZENTRATION UND AUSDAUER'},
+    {key:'sprache',titel:'SPRACHE / KOMMUNIKATION'},
+    {key:'emotionen',titel:'EMOTIONEN / VERHALTEN'},
+    {key:'sozial',titel:'SOZIALE INTERAKTION'},
+    {key:'motorik',titel:'MOTORIK / WAHRNEHMUNG'}
+  ];
+  const a3z=[];
+  for(const b of a3b){
+    if(!daten[b.key+'_fertig'])continue;
+    const ft=(daten[b.key+'_freitext']||'').trim();
+    if(!ft)continue;
+    a3z.push(b.titel);
+    if(b.key==='sprache'&&daten.sprache_mehrsprachig){
+      let ms='Mehrsprachigkeit: '+daten.sprache_mehrsprachig;
+      if((daten.sprache_sprachen||'').trim())ms+=' \u2013 '+daten.sprache_sprachen.trim();
+      a3z.push(ms);
+    }
+    a3z.push(ft);
+    if(b.key==='motorik'&&(daten.motorik_sinne||[]).length>0){
+      a3z.push('');a3z.push('Auff\u00e4lligkeiten bei: '+daten.motorik_sinne.join(', '));
+      if((daten.motorik_sinne_text||'').trim())a3z.push(daten.motorik_sinne_text.trim());
+    }
+    const whc=WHConfig[b.key]||[];
+    for(const wh of whc){const t=(daten[wh.k]||'').trim();if(t){a3z.push('');a3z.push('\u25b8 '+wh.l());a3z.push(t)}}
+    a3z.push('');a3z.push('');
+  }
+  if(a3z.length){z.push(linie);z.push('3. Entwicklungsbereiche');z.push(linie);z.push('');z.push(...a3z)}
+
+  // A4
+  const a4z=[];
+  if(daten.lernstrategien_fertig){
+    const ft=(daten.lernstrategien_freitext||'').trim();
+    if(ft){
+      a4z.push('LERNSTRATEGIEN');a4z.push(ft);
+      if((daten.lernstrategien_naechster||'').trim()){a4z.push('');a4z.push('\u25b8 N\u00e4chster Schritt');a4z.push(daten.lernstrategien_naechster.trim())}
+      a4z.push('');a4z.push('');
+    }
+  }
+  for(const fach of [{key:'deutsch',titel:'DEUTSCH'},{key:'mathe',titel:'MATHE'}]){
+    if(!daten[fach.key+'_fertig']||daten[fach.key+'_modus']==='keine-infos')continue;
+    const det=(daten[fach.key+'_details']||'').trim();const niv=daten[fach.key+'_niveau'];
+    if(!det&&!niv)continue;
+    a4z.push(fach.titel+(niv?' (Niveau: '+niv+')':''));
+    if(det)a4z.push(det);
+    if((daten[fach.key+'_naechster']||'').trim()){a4z.push('');a4z.push('\u25b8 N\u00e4chster Lernschritt');a4z.push(daten[fach.key+'_naechster'].trim())}
+    a4z.push('');a4z.push('');
+  }
+  if(a4z.length){z.push(linie);z.push('4. Lernen & fachliche Kompetenzen');z.push(linie);z.push('');z.push(...a4z)}
+
+  return z.join('\n').replace(/\n{4,}/g,'\n\n\n').trim();
+}
+
+function textVorschau(){
+  if(!validiereExport())return;
+  const text=generiereText();
+  document.getElementById('textvorschau-text').textContent=text;
+  document.getElementById('kopiert-hinweis').style.display='none';
+  document.getElementById('textvorschau-overlay').classList.add('sichtbar');
+}
+document.getElementById('text-kopieren').addEventListener('click',()=>{
+  const text=document.getElementById('textvorschau-text').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const h=document.getElementById('kopiert-hinweis');h.style.display='';setTimeout(()=>h.style.display='none',2000);
+  });
+});
+document.getElementById('textvorschau-schliessen').addEventListener('click',()=>{
+  document.getElementById('textvorschau-overlay').classList.remove('sichtbar');
+});
+document.getElementById('textvorschau-overlay').addEventListener('click',e=>{
+  if(e.target===e.currentTarget)document.getElementById('textvorschau-overlay').classList.remove('sichtbar');
+});
+function importFn(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.fk3,.json';
+  inp.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=ev=>{try{daten=Object.assign(leerState(),JSON.parse(ev.target.result));speichereState();render()}catch(err){alert('Die Datei konnte nicht gelesen werden.')}};r.readAsText(f)});
+  inp.click();
+}
+render();
+</script>
+<script data-goatcounter="https://foerderplanung-digital-cgs.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<div style="display:none;"><script language="JavaScript" src="https://www.besucherzaehler-kostenlos.de/js/counter.js.php?count=1&id=foerderplanung_digital_cgs&start=0&design=1c"></script></div>
+</body>
+</html>
