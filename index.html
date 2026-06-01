@@ -382,6 +382,8 @@ function mkFortschrittBadges(id){
   return d;
 }
 function aktualisiereUI(){
+    goatcounter.count({path:"fk3-start",title:"fk3-start",event:true});
+
   document.querySelectorAll('[data-fortschritt-badges]').forEach(el=>{const id=el.dataset.fortschrittBadges;const neu=mkFortschrittBadges(id);el.replaceWith(neu)});
   // A1 stichpunkt badges
   document.querySelectorAll('[data-a1-key]').forEach(titel=>{
